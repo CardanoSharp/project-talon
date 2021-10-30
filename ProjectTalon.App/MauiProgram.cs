@@ -5,6 +5,8 @@ using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using ProjectTalon.App.Data;
+using System;
+using System.IO;
 
 namespace ProjectTalon.App
 {
@@ -22,7 +24,11 @@ namespace ProjectTalon.App
                 });
 
             builder.Services.AddBlazorWebView();
-            builder.Services.AddSingleton<WeatherForecastService>();
+
+
+            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Talon.db3");
+            builder.Services.AddSingleton<WalletDatabase>(new WalletDatabase(dbPath));
+            builder.Services.AddSingleton<WalletKeyDatabase>(new WalletKeyDatabase(dbPath));
 
             return builder.Build();
         }
