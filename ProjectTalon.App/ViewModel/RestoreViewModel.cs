@@ -8,6 +8,9 @@ using ProjectTalon.App.Data;
 using ProjectTalon.App.Data.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using SQLiteNetExtensions.Extensions;
+using SQLite;
+using System.Threading.Tasks;
 
 namespace ProjectTalon.App.ViewModel
 {
@@ -17,6 +20,7 @@ namespace ProjectTalon.App.ViewModel
 
         private readonly IMnemonicService _mnemonicService;
         private readonly WalletDatabase _walletDatabase;
+        readonly SQLite.SQLiteAsyncConnection database;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -29,7 +33,7 @@ namespace ProjectTalon.App.ViewModel
             _walletDatabase = walletDatabase;
         }
 
-        private Mnemonic RestoreMnemonicHDWallet(string mnemonicPharase, string walletName)
+        private async Task<Mnemonic> RestoreMnemonicHDWalletAsync(string mnemonicPharase, string walletName)
         {
             // Restore a Mnemonic
             var mnemonic = _mnemonicService.Restore(mnemonicPharase);
@@ -50,12 +54,7 @@ namespace ProjectTalon.App.ViewModel
             // Get the Public Key from the Stake Private Key
             PublicKey stakePub = stakePrv.GetPublicKey(false);
 
-            _walletDatabase.SaveWalletAsync(new Wallet
-            {
-                Name = walletName,
-                WalletType = WalletType.HD,
-            });
-            
+            await database.RunInTransactionAsync((SQLiteConnection transaction))
         }
     }
 }
