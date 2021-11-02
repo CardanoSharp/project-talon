@@ -1,19 +1,27 @@
 ﻿@page "/"
 @layout BlankLayout
+@inject NavigationManager UriHelper
 
-    <div class="w-100 d-flex flex-column justify-content-center text-center pt-3">
-        <h1>Welcome to Talon Wallet</h1>
+<div class="w-100 d-flex flex-column justify-content-center text-center pt-3">
+    <h1>Welcome to Talon Wallet</h1>
 
-        <h5>How would you like to get started?</h5>
-        <div class="d-flex flex-row">
-            <div class="p-2 flex-sm-fill">
-                <button class="btn btn-primary btn-block">Create a Wallet</button>
-            </div>
-            <div class="p-2 flex-sm-fill">
-                <button class="btn btn-primary btn-block">Restore a Wallet</button>
-            </div>
-            <div class="p-2 flex-sm-fill">
-                <button class="btn btn-primary btn-block">Import a Wallet</button>
-            </div>
+    <h5>How would you like to get started?</h5>
+    <div class="d-flex flex-row">
+        <div class="p-2 flex-sm-fill">
+            <button class="btn btn-primary btn-block" @onclick="@(()=>GoTo("generate"))">Generate a Wallet</button>
+        </div>
+        <div class="p-2 flex-sm-fill">
+            <button class="btn btn-primary btn-block" @onclick="@(()=>GoTo("restore"))">Restore a Wallet</button>
+        </div>
+        <div class="p-2 flex-sm-fill">
+            <button class="btn btn-primary btn-block" @onclick="@(()=>GoTo("import"))">Import a Wallet</button>
         </div>
     </div>
+</div>
+
+@code{
+    void GoTo(string page)
+    {
+        UriHelper.NavigateTo(page);
+    }
+}

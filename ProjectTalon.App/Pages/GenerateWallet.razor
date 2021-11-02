@@ -1,16 +1,44 @@
 ﻿
-@page "Generate"
+@page "/generate/"
 
 <div class="card">
-    <img class="card-img-top" src="..." alt="Card image cap">
     <div class="card-body">
         <h5 class="card-title">Generate Wallet</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
+        @if (!ConsentToSeeMnumonic)
+        {
+            <p class="card-text">
+                The following screen will show you your 15 word mnumonic. Please do not show your mnumonic to anyone you do not want to have access to your account.
+                <br />
+                <br />
+                It is very import that you record these 15 words in a safe place. failure to do so could result in the inability to access your funds.
+            </p>
+            <Button Text="See Mnumonic" OnClick="GenerateMnumonic" />
+        }
+        else
+        {
+            <div>
+                <p class="card-text">
+                    @Mnumonic
+                </p>
+                <br />
+                <p class="card-text">
+                    This is the only time you will be able to see your Mnumonic. Please only click next once you are sure you have recorded them properly
+                </p>
+                <Button Text="Next"  />
+            </div>
+        }
     </div>
 </div>
 
 @code {
+    bool ConsentToSeeMnumonic { get; set; } = false;
+    string Mnumonic { get; set; }
+
+    void GenerateMnumonic()
+    {
+        ConsentToSeeMnumonic = true;
+        Mnumonic = "consider friend complete substantial keep explain game disuse cobweb cheese deny sink consider exchange fallaciouss crawny sun bite sized notice whip savor vagabond";
+    }
 
 }
 
