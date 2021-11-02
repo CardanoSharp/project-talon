@@ -1,12 +1,19 @@
 ﻿@page "/"
+@layout BlankLayout
 
-<h1>No Wallets Found</h1>
+    <div class="w-100 d-flex flex-column justify-content-center text-center pt-3">
+        <h1>Welcome to Talon Wallet</h1>
 
-<div class="d-flex">
-	<div class="p-2 flex-sm-fill">
-		<button class="btn btn-success btn-block">Create</button>
-	</div>
-	<div class="p-2 flex-sm-fill">
-		<button class="btn btn-primary btn-block">Restore</button>
-	</div>
-</div>
+        <h5>How would you like to get started?</h5>
+        <div class="d-flex flex-row">
+            <div class="p-2 flex-sm-fill">
+                <button class="btn btn-primary btn-block">Create a Wallet</button>
+            </div>
+            <div class="p-2 flex-sm-fill">
+                <button class="btn btn-primary btn-block">Restore a Wallet</button>
+            </div>
+            <div class="p-2 flex-sm-fill">
+                <button class="btn btn-primary btn-block">Import a Wallet</button>
+            </div>
+        </div>
+    </div>
