@@ -25,10 +25,8 @@ namespace ProjectTalon.App
 
             builder.Services.AddBlazorWebView();
 
-
-            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Talon.db3");
-            builder.Services.AddSingleton<WalletDatabase>(new WalletDatabase(dbPath));
-            builder.Services.AddSingleton<WalletKeyDatabase>(new WalletKeyDatabase(dbPath));
+            builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
+            builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
             return builder.Build();
         }
