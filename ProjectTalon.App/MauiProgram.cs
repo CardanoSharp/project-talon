@@ -5,6 +5,8 @@ using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using ProjectTalon.App.Data;
+using System;
+using System.IO;
 
 namespace ProjectTalon.App
 {
@@ -22,7 +24,9 @@ namespace ProjectTalon.App
                 });
 
             builder.Services.AddBlazorWebView();
-            builder.Services.AddSingleton<WeatherForecastService>();
+
+            builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
+            builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
             return builder.Build();
         }
