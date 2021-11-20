@@ -7,48 +7,53 @@ using System.Threading.Tasks;
 
 namespace ProjectTalon.App.Data
 {
-    public class WalletDatabase
+    public interface IWalletDatabase
     {
-        readonly SQLite.SQLiteAsyncConnection database;
+        Task<List<Wallet>> GetWalletsAsync();
+        Task<Wallet> GetWalletAsync(int id);
+        Task<int> SaveWalletAsync(Wallet wallet);
+        Task<int> DeleteWalletAsync(Wallet wallet);
+    }
 
-        public WalletDatabase(string dbPath)
+    public class WalletDatabase: BaseDatabase, IWalletDatabase
+    {
+        public WalletDatabase()
         {
-            database = new SQLite.SQLiteAsyncConnection(dbPath);
             database.CreateTableAsync<Wallet>().Wait();
         }
 
-        public Task<List<Wallet>> GetWalletsAsync()
+        public async Task<List<Wallet>> GetWalletsAsync()
         {
             //Get all wallets.
-            return database.Table<Wallet>().ToListAsync();
+            return await database.Table<Wallet>().ToListAsync();
         }
 
-        public Task<Wallet> GetWalletAsync(int id)
+        public async Task<Wallet> GetWalletAsync(int id)
         {
             // Get a specific wallet.
-            return database.Table<Wallet>()
+            return await database.Table<Wallet>()
                             .Where(i => i.Id == id)
                             .FirstOrDefaultAsync();
         }
 
-        public Task<int> SaveWalletAsync(Wallet wallet)
+        public async Task<int> SaveWalletAsync(Wallet wallet)
         {
             if (wallet.Id != 0)
             {
                 // Update an existing wallet.
-                return database.UpdateAsync(wallet);
+                return await database.UpdateAsync(wallet);
             }
             else
             {
                 // Save a new wallet.
-                return database.InsertAsync(wallet);
+                return await database.InsertAsync(wallet);
             }
         }
 
-        public Task<int> DeleteWalletAsync(Wallet wallet)
+        public async Task<int> DeleteWalletAsync(Wallet wallet)
         {
             // Delete a wallet.
-            return database.DeleteAsync(wallet);
+            return await database.DeleteAsync(wallet);
         }
     }
 }
