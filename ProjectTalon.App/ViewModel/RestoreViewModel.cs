@@ -33,7 +33,7 @@ namespace ProjectTalon.App.ViewModel
             _mnemonicService = mnemonicService;
             _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
-            //TODO this pattern was found at https://blog.stephencleary.com/2013/01/async-oop-2-constructors.html and hill need some rework
+            //TODO this pattern was found at https://blog.stephencleary.com/2013/01/async-oop-2-constructors.html and will need some rework and will bind to a model later
             RestoreWallet = RestoreMnemonicHDWalletAsync(mnemonicPharase, walletName); 
         }
 
