@@ -1,5 +1,4 @@
-﻿using CardanoSharp.Wallet;
-using Microsoft.AspNetCore.Components.WebView.Maui;
+﻿using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls.Compatibility;
@@ -26,11 +25,8 @@ namespace ProjectTalon.App
 
             builder.Services.AddBlazorWebView();
 
-
-            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Talon.db3");
-            builder.Services.AddSingleton<WalletDatabase>(new WalletDatabase(dbPath));
-            builder.Services.AddSingleton<WalletKeyDatabase>(new WalletKeyDatabase(dbPath));
-            builder.Services.AddTransient<IMnemonicService, MnemonicService>();
+            builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
+            builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
             return builder.Build();
         }
