@@ -1,8 +1,6 @@
 ﻿using CardanoSharp.Wallet;
-using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
-using Microsoft.Maui.Controls;
 using ProjectTalon.App.Common;
 using ProjectTalon.App.Data;
 using ProjectTalon.App.Data.Models;
@@ -10,7 +8,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SQLite;
 using System.Threading.Tasks;
-using ProjectTalon.App.View;
 
 namespace ProjectTalon.App.ViewModel
 {
@@ -28,13 +25,25 @@ namespace ProjectTalon.App.ViewModel
 
         public Task RestoreWallet { get; private set; }
 
-        public RestoreViewModel(IMnemonicService mnemonicService, WalletDatabase walletDatabase, WalletKeyDatabase walletKeyDatabase, string mnemonicPharase, string walletName)
+        public RestoreViewModel(IMnemonicService mnemonicService, WalletDatabase walletDatabase,
+                                WalletKeyDatabase walletKeyDatabase, string mnemonicPharase, string walletName)
         {
+            if (string.IsNullOrWhiteSpace(mnemonicPharase))
+            {
+                throw new System.ArgumentException($"'{nameof(mnemonicPharase)}' cannot be null or empty.", nameof(mnemonicPharase));
+            }
+
+            if (string.IsNullOrWhiteSpace(walletName))
+            {
+                throw new System.ArgumentException($"'{nameof(walletName)}' cannot be null or empty.", nameof(walletName));
+            }
+
             _mnemonicService = mnemonicService;
             _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
+            
             //TODO this pattern was found at https://blog.stephencleary.com/2013/01/async-oop-2-constructors.html and will need some rework and will bind to a model later
-            RestoreWallet = RestoreMnemonicHDWalletAsync(mnemonicPharase, walletName); 
+            RestoreWallet = RestoreMnemonicHDWalletAsync(mnemonicPharase, walletName);
         }
 
         private async Task RestoreMnemonicHDWalletAsync(string mnemonicPharase, string walletName)
@@ -43,7 +52,7 @@ namespace ProjectTalon.App.ViewModel
             var mnemonic = _mnemonicService.Restore(mnemonicPharase);
 
             PrivateKey rootKey = mnemonic.GetRootKey();
-            Wallet newlyCreatedWallet; 
+            Wallet newlyCreatedWallet;
 
 
 
@@ -57,7 +66,7 @@ namespace ProjectTalon.App.ViewModel
                     WalletType = (int)WalletType.HD,
                 });
 
-                newlyCreatedWallet = await  _walletDatabase.GetWalletAsync(walletId);
+                newlyCreatedWallet = await _walletDatabase.GetWalletAsync(walletId);
 
 
 
