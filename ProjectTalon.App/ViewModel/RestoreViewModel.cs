@@ -20,7 +20,7 @@ namespace ProjectTalon.App.ViewModel
 
         private readonly IMnemonicService _mnemonicService;
         private readonly WalletDatabase _walletDatabase;
-        readonly SQLiteAsyncConnection database;
+        private readonly SQLiteAsyncConnection database;
         private readonly WalletKeyDatabase _walletKeyDatabase;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
