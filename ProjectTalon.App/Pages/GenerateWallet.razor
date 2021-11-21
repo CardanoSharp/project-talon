@@ -1,4 +1,4 @@
-﻿
+﻿@using System.ComponentModel.DataAnnotations;
 @page "/generate/"
 
 <div class="card">
@@ -14,7 +14,7 @@
             </p>
             <Button Text="See Mnumonic" OnClick="GenerateMnumonic" />
         }
-        else
+        else if (!DoneSeeingMnumonic)
         {
             <div>
                 <p class="card-text">
@@ -24,20 +24,65 @@
                 <p class="card-text">
                     This is the only time you will be able to see your Mnumonic. Please only click next once you are sure you have recorded them properly
                 </p>
-                <Button Text="Next"  />
+                <Button Text="Next" OnClick="Continue" />
+            </div>
+        }
+        else
+        {
+            <div>
+                <div class="form-group text-left">
+                    <label>Name</label>
+                    <InputText class="form-control" @bind-Value="CreaionForm.Name" />
+                </div>
+                <div class="form-group text-left">
+                    <label>Recovery Phrase</label>
+                    <InputText class="form-control" @bind-Value="CreaionForm.RecoveryPhrase" />
+                </div>
+                <div class="form-group text-left">
+                    <label>Spending Password</label>
+                    <InputText class="form-control" @bind-Value="CreaionForm.SpendingPassword" />
+                </div>
+                <div class="form-group text-left">
+                    <label>Confirm Spending Password</label>
+                    <InputText class="form-control" @bind-Value="CreaionForm.ConfirmSpendingPassword" />
+                </div>
+                <Button Text="Next" />
             </div>
         }
     </div>
 </div>
 
 @code {
+    public class WalletCreationRequest
+    {
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string RecoveryPhrase { get; set; }
+
+        [Required]
+        public string SpendingPassword { get; set; }
+
+        [Required]
+        public string ConfirmSpendingPassword { get; set; }
+    }
+
     bool ConsentToSeeMnumonic { get; set; } = false;
+    bool DoneSeeingMnumonic { get; set; } = false;
     string Mnumonic { get; set; }
+    private WalletCreationRequest CreaionForm = new WalletCreationRequest();
+
 
     void GenerateMnumonic()
     {
         ConsentToSeeMnumonic = true;
         Mnumonic = "consider friend complete substantial keep explain game disuse cobweb cheese deny sink consider exchange fallaciouss crawny sun bite sized notice whip savor vagabond";
+    }
+
+    void Continue()
+    {
+        DoneSeeingMnumonic = true;
     }
 
 }
