@@ -26,16 +26,18 @@ namespace ProjectTalon.App.ViewModel
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public Command RestoreWallet { get; set; }
+        public Task RestoreWallet { get; private set; }
 
-        public RestoreViewModel(IMnemonicService mnemonicService, WalletDatabase walletDatabase, WalletKeyDatabase walletKeyDatabase)
+        public RestoreViewModel(IMnemonicService mnemonicService, WalletDatabase walletDatabase, WalletKeyDatabase walletKeyDatabase, string mnemonicPharase, string walletName)
         {
             _mnemonicService = mnemonicService;
             _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
+            //TODO this pattern was found at https://blog.stephencleary.com/2013/01/async-oop-2-constructors.html and hill need some rework
+            RestoreWallet = RestoreMnemonicHDWalletAsync(mnemonicPharase, walletName); 
         }
 
-        private async Task<WalletView> RestoreMnemonicHDWalletAsync(string mnemonicPharase, string walletName)
+        private async Task RestoreMnemonicHDWalletAsync(string mnemonicPharase, string walletName)
         {
             // Restore a Mnemonic
             var mnemonic = _mnemonicService.Restore(mnemonicPharase);
@@ -90,12 +92,6 @@ namespace ProjectTalon.App.ViewModel
 
                 transaction.Commit();
             });
-
-            return new WalletView
-            {
-                Name = walletName,
-                WalletType = (int)WalletType.HD,
-            }; 
         }
     }
 }
