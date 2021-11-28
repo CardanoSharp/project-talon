@@ -1,7 +1,54 @@
-﻿
-<h3>Component1</h3>
+﻿@using System.ComponentModel.DataAnnotations;
+@page "/restore/"
+@inject NavigationManager UriHelper
+
+<h3>Restore This wallet</h3>
+
+ <div>
+    <EditForm Model="@walletRestorationForm" OnValidSubmit="@HandleValidSubmit">  
+        <div class="form-group text-left">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="walletRestorationForm.Name" />
+        </div>
+        <div class="form-group text-left">
+            <label>Recovery Phrase</label>
+            <InputText class="form-control" @bind-Value="walletRestorationForm.RecoveryPhrase" />
+        </div>
+        <div class="form-group text-left">
+            <label>Spending Password</label>
+            <InputText class="form-control" @bind-Value="walletRestorationForm.SpendingPassword" />
+        </div>
+        <div class="form-group text-left">
+            <label>Confirm Spending Password</label>
+            <InputText class="form-control" @bind-Value="walletRestorationForm.ConfirmSpendingPassword" />
+        </div>
+        <FormButton Text="Next" />
+
+    </EditForm>
+    
+</div>
 
 @code {
+    public class WalletCreationRequest
+    {
+        [Required]
+        public string Name { get; set; }
 
+        [Required]
+        public string RecoveryPhrase { get; set; }
+
+        [Required]
+        public string SpendingPassword { get; set; }
+
+        [Required]
+        public string ConfirmSpendingPassword { get; set; }
+    }
+    
+    private WalletCreationRequest walletRestorationForm = new WalletCreationRequest();
+
+    private void HandleValidSubmit()
+    {
+        UriHelper.NavigateTo("wallet/dashboard");
+    }
 }
 
