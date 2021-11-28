@@ -1,7 +1,7 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 @page "/wallet/dashboard/"
 @using ProjectTalon.App.ViewModel
-
+@inject NavigationManager UriHelper
 
 <h1>Dashboard</h1>
 
@@ -76,14 +76,15 @@
                                     @transaction.Amount @transaction.TokenName
                                 </div>
                                 <div>
-
+                                    <Button Text="View Details" />
                                 </div>
                             </div>
-                            
                         </li>
                     }
-                    
                 </ul>
+                <div class="text-center pt-3" @onclick="@(e => GoTo("transactions"))">
+                    See More
+                </div>
             </div>
         </div>
     </div>
@@ -119,6 +120,11 @@
     public List<Token> Tokens;
     public List<Transaction> Transactions;
 
+    public void GoTo(string url)
+    {
+        UriHelper.NavigateTo("wallet/" + url);
+    }
+
     protected override void OnInitialized()
     {
         FetchDashBoard();
@@ -139,8 +145,7 @@
             {
                 Amount = 100000,
                 Name = "Token1",
-                Asset = "Asset123",
-                TokenName = "Ada"
+                Asset = "Asset123"
             });
 
         Transactions = new();
@@ -148,7 +153,8 @@
             {
                 Amount = 5163,
                 Date = DateTime.Now,
-                TransactionStatusId = 1
+                TransactionStatusId = 1,
+                TokenName = "Ada"
             });
     }
 
