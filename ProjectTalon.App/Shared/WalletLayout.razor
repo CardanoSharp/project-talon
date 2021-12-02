@@ -1,5 +1,27 @@
-﻿<h3>WalletLayout</h3>
+﻿<div class="d-flex flex-row align-items-stretch h-100 w-100">
+    <div class="h-100 bg-purple-2 d-felx flex-column p-3" style="width:200px">
+        <div class="text-light cursor-pointer">
+            Dashboard
+        </div>
+        <div class="text-light cursor-pointer">
+            Transactions
+        </div>
+        <div class="text-light cursor-pointer">
+            Send
+        </div>
+        <div class="text-light cursor-pointer">
+            Receive
+        </div>
+        <div class="text-light cursor-pointer">
+            Staking
+        </div>
+    </div>
+    <div class="w-100 p-3">
+        @ChildContent
+    </div>
+</div>
 
 @code {
-
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 }

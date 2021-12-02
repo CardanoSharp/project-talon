@@ -19,6 +19,18 @@ app {
     
 }
 
+.bg-purple-1 {
+    background-color: #733AD0
+}
+
+.bg-purple-2 {
+    background-color: #8A5BD8
+}
+
+.cursor-pointer{
+    cursor: pointer;
+}
+
 .top-bar {
     background-color:#2C2C2C;
     padding:0;
