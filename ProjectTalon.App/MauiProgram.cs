@@ -6,7 +6,9 @@ using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using ProjectTalon.App.Data;
 using System;
+using System.Diagnostics;
 using System.IO;
+using Microsoft.Maui.LifecycleEvents;
 
 namespace ProjectTalon.App
 {
@@ -23,12 +25,32 @@ namespace ProjectTalon.App
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
+            builder.ConfigureLifecycleEvents(lc =>
+            {
+#if WINDOWS
+                lc.AddWindows(w =>
+                {
+                    w.OnLaunched((_,_) =>
+                    {
+                        TalonApi.Start();
+                    });
+
+                    w.OnClosed((_, _) =>
+                    {
+                        TalonApi.Stop();
+                    });
+                });
+#endif
+            });
+
             builder.Services.AddBlazorWebView();
 
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
             builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
-            return builder.Build();
+            var app = builder.Build();
+
+            return app;
         }
     }
 }
