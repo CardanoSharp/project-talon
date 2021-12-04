@@ -70,7 +70,6 @@ namespace ProjectTalon.App.ViewModel
                     WalletId = newlyCreatedWallet.Id,
                     KeyType = (int)KeyType.Account,
                     Skey = JsonConvert.SerializeObject(accountNode.PrivateKey.Key.Encrypt(newWallet.SpendingPassword)),
-                    Chaincode = JsonConvert.SerializeObject(accountNode.PrivateKey.Chaincode),
                     Vkey = JsonConvert.SerializeObject(accountNode.PublicKey.Key),
                     KeyIndex = accountIx
                 });

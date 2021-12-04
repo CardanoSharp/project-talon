@@ -30,8 +30,9 @@ namespace ProjectTalon.App
             //CardanoSharp
             builder.Services.AddTransient<IMnemonicService, MnemonicService>();
 
-            //ViewModels
+            //ViewModels & Services
             builder.Services.AddTransient<IGenerateMnemonicViewModel, GenerateMnemonicViewModel>();
+            builder.Services.AddTransient<Services.IWalletService, Services.WalletService>();
 
             //SQLite
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();

@@ -16,7 +16,7 @@
                 <br />
                 It is very import that you record these 15 words in a safe place. failure to do so could result in the inability to access your funds.
             </p>
-            <Button Text="See Mnumonic" OnClick="ViewModel.GenerateMnemonic" />
+            <button @onclick="ViewModel.GenerateMnemonic">Generate Mnemonic</button>    
         }
         else if (!ViewModel.DoneSeeingMnumonic)
         {
@@ -28,14 +28,16 @@
                 <p class="card-text">
                     This is the only time you will be able to see your Mnumonic. Please only click next once you are sure you have recorded them properly
                 </p>
-                <Button Text="Next" OnClick="ViewModel.RecordedConfirmed" />
+                <button @onclick="ViewModel.RecordedConfirmed">Next</button>
             </div>
         }
         else
         {
             <div>
-                <EditForm Model="@ViewModel.WalletCreationForm" OnValidSubmit="@ViewModel.HandleValidSubmit">                    
-                   <div class="form-group text-left">
+                <EditForm EditContext="@ViewModel.EditContext" OnValidSubmit="@ViewModel.HandleValidSubmit"> 
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />                   
+                    <div class="form-group text-left">
                         <label>Name</label>
                         <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.Name" />
                     </div>
@@ -51,7 +53,7 @@
                         <label>Confirm Spending Password</label>
                         <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.ConfirmSpendingPassword" />
                     </div>
-                    <FormButton Text="Next" />
+                    <button type="submit">Submit</button>
                 </EditForm>
             </div>
         }
