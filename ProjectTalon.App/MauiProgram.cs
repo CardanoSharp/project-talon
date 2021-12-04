@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Components.WebView.Maui;
+﻿using CardanoSharp.Wallet;
+using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using ProjectTalon.App.Data;
+using ProjectTalon.App.ViewModel;
 using System;
 using System.IO;
 
@@ -25,6 +27,13 @@ namespace ProjectTalon.App
 
             builder.Services.AddBlazorWebView();
 
+            //CardanoSharp
+            builder.Services.AddTransient<IMnemonicService, MnemonicService>();
+
+            //ViewModels
+            builder.Services.AddTransient<IGenerateMnemonicViewModel, GenerateMnemonicViewModel>();
+
+            //SQLite
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
             builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
