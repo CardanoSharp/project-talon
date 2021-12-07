@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.ViewModel
+namespace ProjectTalon.App.Models
 {
-    public class WalletViewModel
+    public class WalletSummary
     {
         public string Name { get; set; }
         public decimal Amount { get; set; }

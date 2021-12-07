@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.Common
+namespace ProjectTalon.App.Models
 {
     public class WalletCreationRequest
     {

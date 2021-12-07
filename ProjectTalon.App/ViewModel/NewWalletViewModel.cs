@@ -1,7 +1,7 @@
 ﻿using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
-using ProjectTalon.App.Common;
+using ProjectTalon.App.Enums;
 using ProjectTalon.App.Data;
 using ProjectTalon.App.Data.Models;
 using System.ComponentModel;

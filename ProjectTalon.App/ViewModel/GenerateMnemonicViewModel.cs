@@ -3,7 +3,7 @@ using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using ProjectTalon.App.Common;
+using ProjectTalon.App.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
