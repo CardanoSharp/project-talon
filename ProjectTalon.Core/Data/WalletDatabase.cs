@@ -11,6 +11,9 @@ namespace ProjectTalon.Core.Data
     {
         Task<List<Wallet>> GetWalletsAsync();
         Task<Wallet> GetWalletAsync(int id);
+        Task<Wallet> GetWalletByNameAsync(string name);
+        Task<int> GetWalletCountAsync();
+        Task<bool> WalletExistsAsync(string name);
         Task<int> SaveWalletAsync(Wallet wallet);
         Task<int> DeleteWalletAsync(Wallet wallet);
     }
@@ -34,6 +37,25 @@ namespace ProjectTalon.Core.Data
             return await database.Table<Wallet>()
                             .Where(i => i.Id == id)
                             .FirstOrDefaultAsync();
+        }
+
+        public async Task<Wallet> GetWalletByNameAsync(string name)
+        {
+            return await database.Table<Wallet>()
+                    .Where(i => i.Name == name)
+                    .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> GetWalletCountAsync()
+        {
+            return await database.Table<Wallet>().CountAsync();
+        }
+
+        public async Task<bool> WalletExistsAsync(string name)
+        {
+            return (await database.Table<Wallet>()
+                    .Where(i => i.Name == name)
+                    .FirstOrDefaultAsync()) != null;
         }
 
         public async Task<int> SaveWalletAsync(Wallet wallet)

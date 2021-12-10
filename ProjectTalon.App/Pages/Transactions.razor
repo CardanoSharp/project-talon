@@ -1,0 +1,71 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using ProjectTalon.App.ViewModel
+@using ProjectTalon.App.Enums
+@page "/wallet/transactions/"
+@inject NavigationManager UriHelper
+
+<h1>Transactions</h1>
+
+<h6>Number of Transactions: @TransactionList.Count()</h6>
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Transaction Type</th>
+                  <th>Status</th>
+                  <th>Fee</th>
+                  <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var transaction in TransactionList)
+                {
+                    <tr>
+                        <td scope="row">@transaction.Date.ToString()</td>
+                        <td>@transaction.TransactionType</td>
+                        <td>@Enum.GetName(typeof(TransactionStatus), transaction.TransactionStatusId)</td>
+                        <td>@transaction.Fee</td>
+                        <td>@transaction.Amount</td>
+                    </tr>
+                }
+          </tbody>
+        </table>
+    </div>
+</div>
+    
+
+@code {
+
+    public class Transaction
+    {
+        public DateTime Date { get; set; }
+        public int TransactionStatusId { get; set; }
+        public decimal Amount { get; set; }
+        public string TokenName { get; set; }
+        public string TransactionType { get; set; }
+        public decimal Fee { get; set; }
+    }
+
+    public List<Transaction> TransactionList;
+
+    protected override void OnInitialized()
+    {
+        FetchTransactions();
+    }
+
+    void FetchTransactions()
+    {
+        TransactionList = new();
+        TransactionList.Add(new()
+            {
+                Amount = 5163,
+                Date = DateTime.Now,
+                TokenName = "Ada",
+                TransactionType = "ADA Sent",
+                TransactionStatusId = (int)TransactionStatus.Sent,
+                Fee = 5
+            });
+    }
+}

@@ -1,0 +1,22 @@
+﻿
+<div class="btn btn-lg btn-@Theme shadow cursor-pointer mt-3 @Classes" @onclick="OnClick" type="@Type">
+    @Text
+</div>
+
+@code {
+    [Parameter]
+    public string Theme { get; set; } = "primary";
+
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public string Classes { get; set; }
+
+    [Parameter]
+    public string Type { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+}
