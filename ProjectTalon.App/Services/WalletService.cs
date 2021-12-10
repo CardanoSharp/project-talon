@@ -1,9 +1,9 @@
 ﻿using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
-using ProjectTalon.App.Enums;
-using ProjectTalon.App.Data;
-using ProjectTalon.App.Data.Models;
+using ProjectTalon.Core.Common;
+using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 using SQLite;
 using System;
 using System.Collections.Generic;

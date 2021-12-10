@@ -32,8 +32,10 @@ app.MapGet("/mnemonic/{size}", (int size) =>
 })
 .WithName("GenerateMnemonic");
 
-app.MapGet("/wallet/{id}/balance", async (int id, ICardanoService cardanoService) =>
+app.MapGet("/wallet/{id}/balance", async (int id, IWalletDatabase walletdatabase, IWalletKeyDatabase keyDatabase, ICardanoService cardanoService) =>
 {
+
+
     var block = await cardanoService.Blocks.GetLatestAsync();
     return block.Slot;
 });

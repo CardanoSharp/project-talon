@@ -2,7 +2,7 @@
 using ProjectTalon.App.Models;
 using System.Transactions;
 using Microsoft.AspNetCore.Components;
-using ProjectTalon.App.Data;
+using ProjectTalon.Core.Data;
 using System;
 using System.Threading.Tasks;
 

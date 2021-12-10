@@ -1,4 +1,4 @@
-﻿using ProjectTalon.App.Data;
+﻿using ProjectTalon.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace ProjectTalon.App.ViewModel
 {
     public interface IWalletLayoutViewModel
     {
-        List<Data.Models.Wallet> Wallets { get; set; }
+        List<Core.Data.Models.Wallet> Wallets { get; set; }
         int CurrentWallet { get; set; }
         Task GetWallets();
     }
@@ -19,7 +19,7 @@ namespace ProjectTalon.App.ViewModel
         private IWalletDatabase _walletDatabase;
 
         public int CurrentWallet { get; set; }
-        public List<Data.Models.Wallet> Wallets { get; set; } = new List<Data.Models.Wallet>();
+        public List<Core.Data.Models.Wallet> Wallets { get; set; } = new List<Core.Data.Models.Wallet>();
 
         public WalletLayoutViewModel(IWalletDatabase walletDatabase)
         {
