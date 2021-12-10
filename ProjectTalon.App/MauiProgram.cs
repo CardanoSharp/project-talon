@@ -4,7 +4,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
-using ProjectTalon.App.Data;
+using ProjectTalon.Core.Data;
 using System;
 using System.Diagnostics;
 using System.IO;

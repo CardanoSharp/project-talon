@@ -1,9 +1,9 @@
 ﻿using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
-using ProjectTalon.App.Common;
-using ProjectTalon.App.Data;
-using ProjectTalon.App.Data.Models;
+using ProjectTalon.Core.Common;
+using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SQLite;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.Data
+namespace ProjectTalon.Core.Data
 {
     public abstract class BaseDatabase
     {

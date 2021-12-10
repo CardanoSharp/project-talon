@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.Common
+namespace ProjectTalon.Core.Common
 {
-    public enum WalletType
+    public enum KeyType
     {
-        HD = 1,
-        KeyPair = 2
+        External,
+        Internal,
+        Staking,
+        Account
     }
 }

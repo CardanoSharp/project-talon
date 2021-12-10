@@ -1,4 +1,7 @@
+using Blockfrost.Api.Extensions;
+using Blockfrost.Api.Services;
 using CardanoSharp.Wallet;
+using ProjectTalon.Core.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
+
+builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
+builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 
 var app = builder.Build();
 
@@ -24,28 +32,14 @@ app.MapGet("/mnemonic/{size}", (int size) =>
 })
 .WithName("GenerateMnemonic");
 
-var summaries = new[]
+app.MapGet("/wallet/{id}/balance", async (int id, ICardanoService cardanoService) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-       new WeatherForecast
-       (
-           DateTime.Now.AddDays(index),
-           Random.Shared.Next(-20, 55),
-           summaries[Random.Shared.Next(summaries.Length)]
-       ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    var block = await cardanoService.Blocks.GetLatestAsync();
+    return block.Slot;
+});
 
 app.Run();
 
-app.
 
 internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
 {
