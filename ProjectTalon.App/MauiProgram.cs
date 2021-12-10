@@ -39,6 +39,7 @@ namespace ProjectTalon.App
             builder.Services.AddTransient<IStakingViewModel, StakingViewModel>();
             builder.Services.AddTransient<ITransactionHistoryViewModel, TransactionHistoryViewModel>();
             builder.Services.AddTransient<IWalletDashboardViewModel, WalletDashboardViewModel>();
+            builder.Services.AddTransient<IWalletLayoutViewModel, WalletLayoutViewModel>();
             builder.Services.AddTransient<Services.IWalletService, Services.WalletService>();
 
             //SQLite
