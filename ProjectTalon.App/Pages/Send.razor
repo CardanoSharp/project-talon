@@ -18,7 +18,17 @@
                             <label>Address</label>
                             <InputText class="form-control" @bind-Value="reciever.Address" />
                         </div>
-                        NEED TO ADD TOKEN SELECTOR HERE
+                        <div>
+                            @foreach(var token in reciever.Tokens)
+                            {
+                                <InputSelect @bind-Value="token.Id" class="form-control">
+                                    @*foreach(var tokenOption in TokenOptions){*@
+                                        <option value="1"> token option</option>
+                                    @*}?       *@
+                                </InputSelect>
+                            }
+                            
+                        </div>
                     </div>
                 }
                  <Button Text="Add Reciever" OnClick="AddReciever" />
@@ -55,8 +65,27 @@
         public string Address { get; set; }
         [Required]
         public decimal Amount { get; set; }
-        public List<TokenViewModel> Tokens { get; set; }
+        public List<TokenViewModel> Tokens { get; set; } = new(){new()};
+        public int TempId { get;set;  }
     }
+
+    public List<TokenViewModel> TokenOptions { get; set; } = new()
+        {
+            new()
+            {
+                Id = 1,
+                Amount = 10,
+                Asset = "Asset1",
+                Name = "Token1"
+            },
+            new()
+            {
+                Id = 2,
+                Amount = 20,
+                Asset = "Asset2",
+                Name = "Token2"
+            }
+        };
 
     public SendRequest SendForm = new SendRequest()
     {

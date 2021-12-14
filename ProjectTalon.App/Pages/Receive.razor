@@ -1,0 +1,48 @@
+﻿@page "/wallet/receive/"
+
+<WalletLayout>
+    <h1>Receive</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2">
+                    <div class="w-100">
+                        <img class="w-100" src="@AddressInfo?.QRCodeUrl" alt="QR Code"/>
+                    </div>
+                </div>
+                <div class="col-10 w-100">
+                    <h3>@AddressInfo?.Address</h3>
+                </div>
+            </div>
+           <div>
+               <Button Text="Generate New Address" OnClick="@GenerateNewAddress"/>
+           </div>
+            
+        </div>
+    </div>
+</WalletLayout>
+
+@code {
+    public class AddressData{
+        public string QRCodeUrl { get; set; }
+        public string Address { get; set; }
+
+    }
+
+    public AddressData AddressInfo { get; set; } 
+
+    protected override void OnInitialized()
+    {
+        AddressInfo = new()
+            {
+                Address = "addr_test1qpx5dv9yx898he0pjkssxhqa5z59dvxdnvvflqng8v3jlwvlzt2g72xze7ker3rcr4htyhqvyk9sw4uh4nhs5g47m2eq9f26rz",
+                QRCodeUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/444px-QR_code_for_mobile_English_Wikipedia.svg.png"
+            };
+    }
+
+    private void GenerateNewAddress()
+    {
+        
+    }
+}
