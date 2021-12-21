@@ -1,7 +1,11 @@
 using Blockfrost.Api.Extensions;
 using Blockfrost.Api.Services;
 using CardanoSharp.Wallet;
+using CardanoSharp.Wallet.Enums;
+using CardanoSharp.Wallet.Extensions.Models;
+using CardanoSharp.Wallet.Models.Keys;
 using ProjectTalon.Core.Data;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,10 +38,32 @@ app.MapGet("/mnemonic/{size}", (int size) =>
 
 app.MapGet("/wallet/{id}/balance", async (int id, IWalletDatabase walletdatabase, IWalletKeyDatabase keyDatabase, ICardanoService cardanoService) =>
 {
+    var wallets = await walletdatabase.GetWalletsAsync();
+    var wallet = await keyDatabase.GetWalletKeysAsync(id);
+    var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
 
+    var payment = publicKey
+        .Derive(RoleType.ExternalChain)
+        .Derive(0);
 
-    var block = await cardanoService.Blocks.GetLatestAsync();
-    return block.Slot;
+    var stake = publicKey
+        .Derive(RoleType.Staking)
+        .Derive(0);
+
+    var baseAdd = new AddressService()
+        .GetAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet, AddressType.Base);
+    long amount = 0;
+    try
+    {
+        var response = await cardanoService.Addresses.GetUtxosAsync(baseAdd.ToString());
+        amount = response.SelectMany(m => m.Amount).Where(m => m.Unit == "lovelace").Sum(m => long.Parse(m.Quantity));
+    }
+    catch
+    {
+        amount = -1;
+    }
+
+    return new { Address = baseAdd.ToString(), TotalBalance = amount };
 });
 
 app.Run();
