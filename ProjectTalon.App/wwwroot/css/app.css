@@ -39,6 +39,10 @@ app {
     background-color: #8A5BD8
 }
 
+.bg-light {
+    background-color: #F9F9F9
+}
+
 .color-primary {
     color: #733AD0
 }
