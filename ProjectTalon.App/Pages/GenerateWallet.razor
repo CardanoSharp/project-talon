@@ -3,9 +3,9 @@
 @layout BlankLayout
 @inject NavigationManager UriHelper
 
-<div class="card">
+<div class="card" style="width:500px">
     <div class="card-body">
-        <h5 class="card-title">Generate Wallet</h5>
+        <h5 class="card-title text-center">Generate Wallet</h5>
         @if (!ConsentToSeeMnumonic)
         {
             <p class="card-text">
@@ -14,7 +14,7 @@
                 <br />
                 It is very import that you record these 15 words in a safe place. failure to do so could result in the inability to access your funds.
             </p>
-            <Button Text="See Mnumonic" OnClick="GenerateMnumonic" />
+            <Button Text="See Mnumonic" OnClick="GenerateMnumonic" Classes="w-100" />
         }
         else if (!DoneSeeingMnumonic)
         {
@@ -26,7 +26,7 @@
                 <p class="card-text">
                     This is the only time you will be able to see your Mnumonic. Please only click next once you are sure you have recorded them properly
                 </p>
-                <Button Text="Next" OnClick="Continue" />
+                <Button Text="Next" OnClick="Continue" Classes="w-100" />
             </div>
         }
         else
@@ -49,7 +49,7 @@
                         <label>Confirm Spending Password</label>
                         <InputText class="form-control" @bind-Value="walletCreationForm.ConfirmSpendingPassword" />
                     </div>
-                    <FormButton Text="Next" />
+                    <FormButton Text="Next" Classes="w-100" />
                 </EditForm>
             </div>
         }
