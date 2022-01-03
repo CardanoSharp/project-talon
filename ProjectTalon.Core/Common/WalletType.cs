@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.ViewModel
+namespace ProjectTalon.Core.Common
 {
-    internal enum TransactionStatusId
+    public enum WalletType
     {
-        Sent = 0,
-        Recieved = 1,
+        HD = 1,
+        KeyPair = 2
     }
 }

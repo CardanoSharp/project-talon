@@ -1,9 +1,9 @@
 ﻿using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
-using ProjectTalon.App.Common;
-using ProjectTalon.App.Data;
-using ProjectTalon.App.Data.Models;
+using ProjectTalon.Core.Common;
+using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using SQLite;
@@ -70,7 +70,6 @@ namespace ProjectTalon.App.ViewModel
                     WalletId = newlyCreatedWallet.Id,
                     KeyType = (int)KeyType.Account,
                     Skey = JsonConvert.SerializeObject(accountNode.PrivateKey.Key.Encrypt(newWallet.SpendingPassword)),
-                    Chaincode = JsonConvert.SerializeObject(accountNode.PrivateKey.Chaincode),
                     Vkey = JsonConvert.SerializeObject(accountNode.PublicKey.Key),
                     KeyIndex = accountIx
                 });

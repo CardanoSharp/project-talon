@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace ProjectTalon.App.Data.Models
+namespace ProjectTalon.Core.Data.Models
 {
     public class Wallet
     {

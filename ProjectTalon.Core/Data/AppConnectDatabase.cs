@@ -1,13 +1,13 @@
-﻿using ProjectTalon.App.Data.Models;
+﻿using ProjectTalon.Core.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.Data
+namespace ProjectTalon.Core.Data
 {
-    public interface IWalletDatabase
+    public interface IAppConnectDatabase
     {
         Task<List<Wallet>> GetWalletsAsync();
         Task<Wallet> GetWalletAsync(int id);
@@ -15,9 +15,9 @@ namespace ProjectTalon.App.Data
         Task<int> DeleteWalletAsync(Wallet wallet);
     }
 
-    public class WalletDatabase: BaseDatabase, IWalletDatabase
+    public class AppConnectDatabase : BaseDatabase, IAppConnectDatabase
     {
-        public WalletDatabase()
+        public AppConnectDatabase()
         {
             database.CreateTableAsync<Wallet>().Wait();
         }
