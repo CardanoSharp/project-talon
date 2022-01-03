@@ -52,7 +52,7 @@ namespace ProjectTalon.App
 
             //ViewModels & Services
             builder.Services.AddTransient<IGenerateMnemonicViewModel, GenerateMnemonicViewModel>();
-            builder.Services.AddTransient<IAddressListViewModel, AddressListViewModel>();
+            //builder.Services.AddTransient<IAddressListViewModel, AddressListViewModel>();
             builder.Services.AddTransient<INewWalletViewModel, NewWalletViewModel>();
             builder.Services.AddTransient<IRestoreViewModel, RestoreViewModel>();
             builder.Services.AddTransient<ISendFundsViewModel, SendFundsViewModel>();
