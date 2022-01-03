@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ProjectTalon.App.ViewModel
 {
-    public class AddressListViewModel
+    internal enum AddressStatusId
     {
-        public string Address { get; set; }
-        public decimal Balence { get; set; }
-        public int StatusId { get; set; }  
+        Unused = 0,
+        Used = 1
     }
 }

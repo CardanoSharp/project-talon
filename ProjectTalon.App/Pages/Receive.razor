@@ -1,0 +1,83 @@
+﻿@page "/wallet/receive/"
+@using ProjectTalon.App.ViewModel
+
+<WalletLayout>
+    <h1>Receive</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2">
+                    <div class="w-100">
+                        <img class="w-100" src="@AddressInfo?.QRCodeUrl" alt="QR Code"/>
+                    </div>
+                </div>
+                <div class="col-10 w-100">
+                    <h3>@AddressInfo?.Address</h3>
+                </div>
+            </div>
+           <div>
+               <Button Text="Generate New Address" OnClick="@GenerateNewAddress"/>
+           </div>
+           <div class="pt-5">
+               <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Generated Balence</th>
+                      <th scope="col">Balance (UTXO sum)</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach(var address in GeneratedAddresses)
+                    {
+                        <tr>
+                            <th scope="row">@address.Address</th>
+                            <td>@address.Balence</td>
+                            <td> @Enum.GetName(typeof(AddressStatusId), address.StatusId)</td>
+                        </tr>
+                    }
+                  </tbody>
+                </table>
+           </div>
+            
+        </div>
+    </div>
+</WalletLayout>
+
+@code {
+    public class AddressData{
+        public string QRCodeUrl { get; set; }
+        public string Address { get; set; }
+    }
+
+    public List<AddressListViewModel> GeneratedAddresses { get; set; } = new();
+    public AddressData AddressInfo { get; set; } 
+
+    protected override void OnInitialized()
+    {
+        AddressInfo = new()
+            {
+                Address = "addr_test1qpx5dv9yx898he0pjkssxhqa5z59dvxdnvvflqng8v3jlwvlzt2g72xze7ker3rcr4htyhqvyk9sw4uh4nhs5g47m2eq9f26rz",
+                QRCodeUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/444px-QR_code_for_mobile_English_Wikipedia.svg.png"
+            };
+
+        GeneratedAddresses.Add(new()
+            {
+                Address = "addr_test1qpxasdfasdfasdfasdfasdfasdfdfsdffeeefffewwvlzt2g72xze7ker3rcr4htyhqvyk9sw4uh4nhs5g47m2eq9f26rz",
+                Balence = 78,
+                StatusId = (int)AddressStatusId.Unused
+            });
+        GeneratedAddresses.Add(new()
+        {
+            Address = "addr_test1qpx5dv9yx898he0pjasdfasdfasdfsdafvflqng8v3jlwvlzt2g72xze7ker3rcr4htyhqvyk9sw4uh4nhs5g47m2eq9f26rz",
+            Balence = 10,
+            StatusId = (int)AddressStatusId.Used
+        });
+    }
+
+    private void GenerateNewAddress()
+    {
+        
+    }
+}

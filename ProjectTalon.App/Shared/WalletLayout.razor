@@ -1,18 +1,20 @@
-﻿<div class="d-flex flex-row align-items-stretch h-100 w-100">
+﻿@inject NavigationManager UriHelper
+
+<div class="d-flex flex-row align-items-stretch h-100 w-100">
     <div class="h-100 bg-purple-2 d-felx flex-column p-3" style="width:200px">
-        <div class="text-light cursor-pointer">
+        <div class="text-light cursor-pointer" onclick="@(()=>goTo("wallet/dashboard"))">
             Dashboard
         </div>
-        <div class="text-light cursor-pointer">
+        <div class="text-light cursor-pointer" onclick="@(()=>goTo("wallet/transactions"))">
             Transactions
         </div>
-        <div class="text-light cursor-pointer">
+        <div class="text-light cursor-pointer" onclick="@(()=>goTo("wallet/send"))">
             Send
         </div>
-        <div class="text-light cursor-pointer">
+        <div class="text-light cursor-pointer" onclick="@(()=>goTo("wallet/receive"))">
             Receive
         </div>
-        <div class="text-light cursor-pointer">
+        <div class="text-light cursor-pointer" onclick="@(()=>goTo("wallet/staking"))">
             Staking
         </div>
     </div>
@@ -24,4 +26,10 @@
 @code {
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    void goTo(string url)
+    {
+        UriHelper.NavigateTo(url);
+    }
+
 }
