@@ -3,31 +3,31 @@
 @layout BlankLayout
 @inject NavigationManager UriHelper
 
-<h3>Restore This wallet</h3>
+<Card CardTitle="Restore This Wallet" CardStyles="min-width:400px">
+     <div>
+        <EditForm Model="@walletRestorationForm" OnValidSubmit="@HandleValidSubmit">  
+            <div class="form-group text-left">
+                <label>Name</label>
+                <InputText class="form-control" @bind-Value="walletRestorationForm.Name" />
+            </div>
+            <div class="form-group text-left">
+                <label>Recovery Phrase</label>
+                <InputText class="form-control" @bind-Value="walletRestorationForm.RecoveryPhrase" />
+            </div>
+            <div class="form-group text-left">
+                <label>Spending Password</label>
+                <InputText class="form-control" @bind-Value="walletRestorationForm.SpendingPassword" />
+            </div>
+            <div class="form-group text-left">
+                <label>Confirm Spending Password</label>
+                <InputText class="form-control" @bind-Value="walletRestorationForm.ConfirmSpendingPassword" />
+            </div>
+            <FormButton Text="Next" Classes="w-100"/>
 
- <div>
-    <EditForm Model="@walletRestorationForm" OnValidSubmit="@HandleValidSubmit">  
-        <div class="form-group text-left">
-            <label>Name</label>
-            <InputText class="form-control" @bind-Value="walletRestorationForm.Name" />
-        </div>
-        <div class="form-group text-left">
-            <label>Recovery Phrase</label>
-            <InputText class="form-control" @bind-Value="walletRestorationForm.RecoveryPhrase" />
-        </div>
-        <div class="form-group text-left">
-            <label>Spending Password</label>
-            <InputText class="form-control" @bind-Value="walletRestorationForm.SpendingPassword" />
-        </div>
-        <div class="form-group text-left">
-            <label>Confirm Spending Password</label>
-            <InputText class="form-control" @bind-Value="walletRestorationForm.ConfirmSpendingPassword" />
-        </div>
-        <FormButton Text="Next" />
-
-    </EditForm>
+        </EditForm>
     
-</div>
+    </div>
+</Card>
 
 @code {
     public class WalletCreationRequest

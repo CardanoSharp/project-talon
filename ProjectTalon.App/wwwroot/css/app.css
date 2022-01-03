@@ -1,4 +1,5 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@800&display=swap');
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -10,10 +11,21 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #733AD0;
+    border-color: #733AD0;
 }
 
+    .btn-primary:hover {
+        color: #fff;
+        background-color: #9157F2;
+        border-color: #733AD0;
+    }
+
+.btn-lg {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-radius: 15px;
+}
 app {
     
     
@@ -27,8 +39,35 @@ app {
     background-color: #8A5BD8
 }
 
+.bg-light {
+    background-color: #F9F9F9
+}
+
+.color-primary {
+    color: #733AD0
+}
+
 .cursor-pointer{
     cursor: pointer;
+}
+
+h1 {
+    font-family: 'Work Sans', sans-serif;
+}
+h2 {
+    font-family: 'Work Sans', sans-serif;
+}
+h3 {
+    font-family: 'Work Sans', sans-serif;
+}
+h4 {
+    font-family: 'Work Sans', sans-serif;
+}
+h5 {
+    font-family: 'Work Sans', sans-serif;
+}
+h6 {
+    font-family: 'Work Sans', sans-serif;
 }
 
 .top-bar {

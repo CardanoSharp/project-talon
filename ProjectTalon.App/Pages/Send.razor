@@ -1,0 +1,105 @@
+﻿@page "/wallet/send/"
+
+@using System.ComponentModel.DataAnnotations
+@using ProjectTalon.App.ViewModel
+<WalletLayout>
+    <h1>Send</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@SendForm" OnValidSubmit="@HandleValidSubmit" >
+                <h5 class="card-title">
+                    Reciever(s)
+                </h5>
+                @foreach(var reciever in SendForm.Recievers)
+                {
+                    <div>
+                        <div class="form-group text-left">
+                            <label>Address</label>
+                            <InputText class="form-control" @bind-Value="reciever.Address" />
+                        </div>
+                        <div>
+                            @foreach(var token in reciever.Tokens)
+                            {
+                                <InputSelect @bind-Value="token.Id" class="form-control">
+                                    @*foreach(var tokenOption in TokenOptions){*@
+                                        <option value="1"> token option</option>
+                                    @*}?       *@
+                                </InputSelect>
+                            }
+                            
+                        </div>
+                    </div>
+                }
+                 <Button Text="Add Reciever" OnClick="AddReciever" />
+                 <div>
+                     Estimated Fees
+                     @SendForm.EstimatedFees
+                 </div>
+                 <div class="form-group text-left">
+                    <label>Spending Password</label>
+                    <InputText class="form-control" @bind-Value="SendForm.SpendingPassword" />
+                 </div>
+                
+
+            </EditForm>
+            
+            
+        </div>
+    </div>
+</WalletLayout>
+
+@code {
+    public class SendRequest
+    {
+        [Required]
+        public List<RecieverRequest> Recievers { get; set; }
+        public decimal EstimatedFees { get; set; } = 3.1M;
+        [Required]
+        public string SpendingPassword { get; set; }
+    }
+
+    public class RecieverRequest
+    {
+        [Required]
+        public string Address { get; set; }
+        [Required]
+        public decimal Amount { get; set; }
+        public List<TokenViewModel> Tokens { get; set; } = new(){new()};
+        public int TempId { get;set;  }
+    }
+
+    public List<TokenViewModel> TokenOptions { get; set; } = new()
+        {
+            new()
+            {
+                Id = 1,
+                Amount = 10,
+                Asset = "Asset1",
+                Name = "Token1"
+            },
+            new()
+            {
+                Id = 2,
+                Amount = 20,
+                Asset = "Asset2",
+                Name = "Token2"
+            }
+        };
+
+    public SendRequest SendForm = new SendRequest()
+    {
+        Recievers = new(){new()}
+    };
+
+    void HandleValidSubmit()
+    {
+
+    }
+
+    void AddReciever()
+    {
+        SendForm.Recievers.Add(new());
+    }
+
+}

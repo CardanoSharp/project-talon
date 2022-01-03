@@ -1,0 +1,33 @@
+﻿<div class="card" >
+  <div class="card-body @CardClasses" style=@CardStyles>
+    <div>
+
+    </div>
+
+    <h5 class="card-title text-center">@CardTitle</h5>
+    <h6 class="card-subtitle mb-2 text-muted">@CardSubtitle</h6>
+    <div>
+        @ChildContent
+    </div>
+  </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string CardTitle { get; set; }
+
+    [Parameter]
+    public string CardSubtitle{ get; set; }
+
+    [Parameter]
+    public string CardClasses { get; set; }
+
+    [Parameter]
+    public string CardStyles { get; set; }
+
+
+}
+ 
