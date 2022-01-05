@@ -9,51 +9,54 @@ namespace ProjectTalon.Core.Data
 {
     public interface IAppConnectDatabase
     {
-        Task<List<Wallet>> GetWalletsAsync();
-        Task<Wallet> GetWalletAsync(int id);
-        Task<int> SaveWalletAsync(Wallet wallet);
-        Task<int> DeleteWalletAsync(Wallet wallet);
+        Task<List<AppConnect>> GetAppConnectionsAsync();
+        Task<AppConnect> GetAppConnectionAsync(int id);
+        Task<AppConnect> GetAppConnectionByAppIdAsync(string appId);
+        Task<int> SaveAppConnectionAsync(AppConnect appConnect);
+        Task<int> DeleteAppConnectionAsync(AppConnect appConnect);
     }
 
     public class AppConnectDatabase : BaseDatabase, IAppConnectDatabase
     {
         public AppConnectDatabase()
         {
-            database.CreateTableAsync<Wallet>().Wait();
+            database.CreateTableAsync<AppConnect>().Wait();
         }
 
-        public async Task<List<Wallet>> GetWalletsAsync()
+        public async Task<List<AppConnect>> GetAppConnectionsAsync()
         {
-            //Get all wallets.
-            return await database.Table<Wallet>().ToListAsync();
+            return await database.Table<AppConnect>().ToListAsync();
         }
 
-        public async Task<Wallet> GetWalletAsync(int id)
+        public async Task<AppConnect> GetAppConnectionAsync(int id)
         {
-            // Get a specific wallet.
-            return await database.Table<Wallet>()
+            return await database.Table<AppConnect>()
                             .Where(i => i.Id == id)
                             .FirstOrDefaultAsync();
         }
 
-        public async Task<int> SaveWalletAsync(Wallet wallet)
+        public async Task<AppConnect> GetAppConnectionByAppIdAsync(string appId)
         {
-            if (wallet.Id != 0)
+            return await database.Table<AppConnect>()
+                            .Where(i => i.AppId == appId)
+                            .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> SaveAppConnectionAsync(AppConnect appConnect)
+        {
+            if (appConnect.Id != 0)
             {
-                // Update an existing wallet.
-                return await database.UpdateAsync(wallet);
+                return await database.UpdateAsync(appConnect);
             }
             else
             {
-                // Save a new wallet.
-                return await database.InsertAsync(wallet);
+                return await database.InsertAsync(appConnect);
             }
         }
-
-        public async Task<int> DeleteWalletAsync(Wallet wallet)
+            
+        public async Task<int> DeleteAppConnectionAsync(AppConnect appConnect)
         {
-            // Delete a wallet.
-            return await database.DeleteAsync(wallet);
+            return await database.DeleteAsync(appConnect);
         }
     }
 }

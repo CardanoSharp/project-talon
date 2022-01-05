@@ -2,106 +2,139 @@
 @page "/"
 @using ProjectTalon.App.ViewModel
 @using ProjectTalon.App.Enums
+@using ProjectTalon.Core.Common
 @inject IWalletDashboardViewModel ViewModel
 
-<WalletLayout>
-    <h1>Dashboard</h1>
+@if(ViewModel.WalletSummary is null)
+{
+    @*Need a Spinner*@
+}else
+{
+<h1>@ViewModel.WalletSummary.Name</h1>
 
-    @if (ViewModel.WalletSummary != null)
+<p>@ViewModel.WalletSummary.SingleAddress</p>
+
+
+<h2>Connections</h2>
+
+<div>
+    @if (ViewModel.Connections.Any())
     {
-        <div class="card"> 
-            <div class="card-body">
-                <h5 class="card-title">
-                    @ViewModel.WalletSummary.Name
-                </h5>
-                <div class=" d-flex justify-content-between">
-                    <div class="h3">
-                        @ViewModel.WalletSummary.Amount
+        @foreach (var conn in ViewModel.Connections)
+        {
+            <div class="row mb-2">
+                <div class="col-6">@conn.Name</div>
+                <div class="col-6">
+                    @if ((int)conn.ConnectionStatus > 0)
+                    {
+                        @(((ConnectionStatus)conn.ConnectionStatus).ToString())
+                    }
+                    else
+                    {
+                        <button class="btn btn-success" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Approved)">Approve</button>
+                        <button class="btn btn-danger" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Denied)">Deny</button>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+}
+
+@*@if (ViewModel.WalletSummary != null)
+{
+    <div class="card"> 
+        <div class="card-body">
+            <h5 class="card-title">
+                @ViewModel.WalletSummary.Name
+            </h5>
+            <div class=" d-flex justify-content-between">
+                <div class="h3">
+                    @ViewModel.WalletSummary.Amount
+                </div>
+                <div>
+                    <div class="h5">
+                        @ViewModel.WalletSummary.AmountInUSD
                     </div>
                     <div>
-                        <div class="h5">
-                            @ViewModel.WalletSummary.AmountInUSD
-                        </div>
-                        <div>
-                            1 ADA = @ViewModel.WalletSummary.CurrencyConversionRate USD
-                        </div>
+                        1 ADA = @ViewModel.WalletSummary.CurrencyConversionRate USD
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    
+<div class="row pt-3">
+    @if(ViewModel.Tokens != null) 
+    {
+        <div class="col-6">
+            <h5>Tokens</h5>
+            <div class="card">
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach(var token in ViewModel.Tokens)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div>
+                                            @token.Name
+                                        </div>
+                                        <div class="font-size-xs">
+                                            @token.Asset
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @token.Amount @token.Name
+                                    </div>
+                                </div>
+                            
+                            </li>
+                        }
+                    
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+    @if (ViewModel.Transactions != null)
+    {
+        <div class="col-6">
+            <h5>Recent Transactions</h5>
+            <div class="card">
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var transaction in ViewModel.Transactions)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div>
+                                            @transaction.Date.ToLongTimeString()
+                                        </div>
+                                        <div class="font-size-xs">
+                                            @Enum.GetName(typeof(TransactionStatus), transaction.TransactionStatus)
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @transaction.Amount @transaction.TokenName
+                                    </div>
+                                    <div>
+                                        <Button Text="View Details" />
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <div class="text-center pt-3" @onclick="@(e => ViewModel.GoTo("transactions"))">
+                        See More
                     </div>
                 </div>
             </div>
         </div>
     }
-    
-    <div class="row pt-3">
-        @if(ViewModel.Tokens != null) 
-        {
-            <div class="col-6">
-                <h5>Tokens</h5>
-                <div class="card">
-                    <div class="card-body">
-                       <ul class="list-group">
-                            @foreach(var token in ViewModel.Tokens)
-                            {
-                                <li class="list-group-item">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <div>
-                                                @token.Name
-                                            </div>
-                                            <div class="font-size-xs">
-                                                @token.Asset
-                                            </div>
-                                        </div>
-                                        <div>
-                                            @token.Amount @token.Name
-                                        </div>
-                                    </div>
-                            
-                                </li>
-                            }
-                    
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        }
-        @if (ViewModel.Transactions != null)
-        {
-            <div class="col-6">
-                <h5>Recent Transactions</h5>
-                <div class="card">
-                    <div class="card-body">
-                        <ul class="list-group">
-                            @foreach (var transaction in ViewModel.Transactions)
-                            {
-                                <li class="list-group-item">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <div>
-                                                @transaction.Date.ToLongTimeString()
-                                            </div>
-                                            <div class="font-size-xs">
-                                                @Enum.GetName(typeof(TransactionStatus), transaction.TransactionStatus)
-                                            </div>
-                                        </div>
-                                        <div>
-                                            @transaction.Amount @transaction.TokenName
-                                        </div>
-                                        <div>
-                                            <Button Text="View Details" />
-                                        </div>
-                                    </div>
-                                </li>
-                            }
-                        </ul>
-                        <div class="text-center pt-3" @onclick="@(e => ViewModel.GoTo("transactions"))">
-                            See More
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</WalletLayout>
+</div>*@
 
 
     
@@ -112,11 +145,13 @@
     {
         if (await ViewModel.GetWalletCount() > 0)
         {
-            ViewModel.FetchDashBoard();
+            await ViewModel.FetchDashBoard();
         }else
         {
             ViewModel.GoTo("new-wallet");
         }
+
+        ViewModel.PropertyChanged += (o, e) => StateHasChanged();
     }
 
 }
