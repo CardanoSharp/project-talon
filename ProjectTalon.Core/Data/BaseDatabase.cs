@@ -13,8 +13,13 @@ namespace ProjectTalon.Core.Data
 
         public BaseDatabase()
         {
-            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ProjectTalon\\Talon.db3");
-            database = new SQLite.SQLiteAsyncConnection(dbPath, true);
+            var dbName = "Talon.db3";
+            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Talon");
+
+            if(!Directory.Exists(dbPath))
+                Directory.CreateDirectory(dbPath);
+
+            database = new SQLite.SQLiteAsyncConnection(Path.Combine(dbPath, dbName), true);
         }
     }
 }
