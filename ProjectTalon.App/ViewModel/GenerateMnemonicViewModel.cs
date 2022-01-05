@@ -70,7 +70,7 @@ namespace ProjectTalon.App.ViewModel
         public async void HandleValidSubmit()
         {
             await _walletService.AddWallet(WalletCreationForm.Name, WalletCreationForm.RecoveryPhrase, WalletCreationForm.SpendingPassword);
-            _uriHelper.NavigateTo("wallet/dashboard");
+            _uriHelper.NavigateTo("");
         }
 
         public void RecordedConfirmed()

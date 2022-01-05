@@ -68,7 +68,7 @@ namespace ProjectTalon.App.ViewModel
 
         public void GoTo(string url)
         {
-            _uriHelper.NavigateTo("wallet/" + url);
+            _uriHelper.NavigateTo(url);
         }
 
         public async Task FetchDashBoard()
