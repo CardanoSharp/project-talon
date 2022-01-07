@@ -19,7 +19,7 @@ namespace ProjectTalon.App.ViewModel
         void HandleValidSubmit();
         void RecordedConfirmed();
 
-        public WalletCreationRequest WalletCreationForm { get; set; }
+        WalletCreationRequest WalletCreationForm { get; set; }
         bool ConsentToSeeMnumonic { get; set; }
         bool DoneSeeingMnumonic { get; set; }
         string Mnemonic { get; set; }

@@ -1,55 +1,34 @@
 ﻿@using System.ComponentModel.DataAnnotations;
+@using ProjectTalon.App.ViewModel
 @page "/restore/"
 @layout BlankLayout
 @inject NavigationManager UriHelper
+@inject IRestoreViewModel ViewModel 
+
 
 <Card CardTitle="Restore This Wallet" CardStyles="min-width:400px">
      <div>
-        <EditForm Model="@walletRestorationForm" OnValidSubmit="@HandleValidSubmit">  
+        <EditForm EditContext="@ViewModel.EditContext" OnValidSubmit="@ViewModel.HandleValidSubmit"> 
+            <DataAnnotationsValidator />
+            <ValidationSummary />                   
             <div class="form-group text-left">
                 <label>Name</label>
-                <InputText class="form-control" @bind-Value="walletRestorationForm.Name" />
+                <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.Name" />
             </div>
             <div class="form-group text-left">
                 <label>Recovery Phrase</label>
-                <InputText class="form-control" @bind-Value="walletRestorationForm.RecoveryPhrase" />
+                <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.RecoveryPhrase" />
             </div>
             <div class="form-group text-left">
                 <label>Spending Password</label>
-                <InputText class="form-control" @bind-Value="walletRestorationForm.SpendingPassword" />
+                <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.SpendingPassword" />
             </div>
             <div class="form-group text-left">
                 <label>Confirm Spending Password</label>
-                <InputText class="form-control" @bind-Value="walletRestorationForm.ConfirmSpendingPassword" />
+                <InputText class="form-control" @bind-Value="ViewModel.WalletCreationForm.ConfirmSpendingPassword" />
             </div>
-            <FormButton Text="Next" Classes="w-100"/>
-
+            <button type="submit">Submit</button>
         </EditForm>
-    
     </div>
 </Card>
-
-@code {
-    public class WalletCreationRequest
-    {
-        [Required]
-        public string Name { get; set; }
-
-        [Required]
-        public string RecoveryPhrase { get; set; }
-
-        [Required]
-        public string SpendingPassword { get; set; }
-
-        [Required]
-        public string ConfirmSpendingPassword { get; set; }
-    }
-    
-    private WalletCreationRequest walletRestorationForm = new WalletCreationRequest();
-
-    private void HandleValidSubmit()
-    {
-        UriHelper.NavigateTo("");
-    }
-}
 
