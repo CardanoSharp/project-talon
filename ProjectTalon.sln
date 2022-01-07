@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.App", "Project
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.Api", "ProjectTalon.Api\ProjectTalon.Api.csproj", "{F3E00A6E-7F35-4460-8AFD-F86D7D99AC15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectTalon.Core", "ProjectTalon.Core\ProjectTalon.Core.csproj", "{F13EBAEC-9597-497C-90AA-7BEC19BB1E04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.Core", "ProjectTalon.Core\ProjectTalon.Core.csproj", "{F13EBAEC-9597-497C-90AA-7BEC19BB1E04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

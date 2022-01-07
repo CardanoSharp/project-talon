@@ -10,35 +10,49 @@
     @*Need a Spinner*@
 }else
 {
-<h1>@ViewModel.WalletSummary.Name</h1>
 
-<p>@ViewModel.WalletSummary.SingleAddress</p>
+<div class="p-5">
+    <div class="pb-5">
+        <h1>@ViewModel.WalletSummary.Name</h1>
+        <Card>
+            <div class="d-flex align-items-baseline">
+                <h6 class="m-0">Address</h6>
+                <p class="pl-3 m-0">@ViewModel.WalletSummary.SingleAddress</p>
+            </div>    
+        </Card>
+    </div>
+        
+        
 
 
-<h2>Connections</h2>
+    <h2>Connections</h2>
 
-<div>
-    @if (ViewModel.Connections.Any())
-    {
-        @foreach (var conn in ViewModel.Connections)
+    <div>
+        @if (ViewModel.Connections.Any())
         {
-            <div class="row mb-2">
-                <div class="col-6">@conn.Name</div>
-                <div class="col-6">
-                    @if ((int)conn.ConnectionStatus > 0)
-                    {
-                        @(((ConnectionStatus)conn.ConnectionStatus).ToString())
-                    }
-                    else
-                    {
-                        <button class="btn btn-success" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Approved)">Approve</button>
-                        <button class="btn btn-danger" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Denied)">Deny</button>
-                    }
-                </div>
-            </div>
+            @foreach (var conn in ViewModel.Connections)
+            {
+                <Card>
+                    <div class="row mb-2">
+                        <div class="col-6">@conn.Name</div>
+                        <div class="col-6">
+                            @if ((int)conn.ConnectionStatus > 0)
+                            {
+                                <Badge Text=@(((ConnectionStatus)conn.ConnectionStatus).ToString()) Theme="@(conn.ConnectionStatus == (int)ConnectionStatus.Approved ? "success" : "danger")" />
+                            }
+                            else
+                            {
+                                <button class="btn btn-success" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Approved)">Approve</button>
+                                <button class="btn btn-danger" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Denied)">Deny</button>
+                            }
+                        </div>
+                    </div>
+                </Card>
+            }
         }
-    }
+    </div>
 </div>
+
 }
 
 @*@if (ViewModel.WalletSummary != null)
