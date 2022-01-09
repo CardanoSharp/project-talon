@@ -13,6 +13,6 @@ namespace ProjectTalon.Core.Data.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string AppId { get; set; }   
-        public bool IsAllowed { get; set; }
+        public int ConnectionStatus { get; set; }
     }
 }

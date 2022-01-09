@@ -13,5 +13,6 @@ namespace ProjectTalon.App.Models
         public decimal AmountInUSD { get; set; }
         public int CurrencyId { get; set; }
         public decimal CurrencyConversionRate { get; set; }
+        public string SingleAddress { get; set; }
     }
 }

@@ -1,0 +1,12 @@
+﻿<span class="@Classes badge rounded-pill bg-@Theme">@Text</span>
+
+@code {
+    [Parameter]
+    public string Theme { get; set; } = "primary";
+
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public string Classes { get; set; }
+}

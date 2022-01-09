@@ -4,8 +4,11 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using ProjectTalon.Core.Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using ProjectTalon.Core.Data;
 using System.Text.Json;
+using ProjectTalon.Core.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,7 @@ builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 
 builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
 builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
+builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
 
 var app = builder.Build();
 
@@ -34,7 +38,7 @@ app.MapGet("/mnemonic/{size}", (int size) =>
 {
     return new MnemonicService().Generate(size);
 })
-.WithName("GenerateMnemonic");
+    .WithName("Generate Mnemonic");
 
 app.MapGet("/wallet/{id}/balance", async (int id, IWalletDatabase walletdatabase, IWalletKeyDatabase keyDatabase, ICardanoService cardanoService) =>
 {
@@ -63,13 +67,41 @@ app.MapGet("/wallet/{id}/balance", async (int id, IWalletDatabase walletdatabase
         amount = -1;
     }
 
-    return new { Address = baseAdd.ToString(), TotalBalance = amount };
-});
+    return Results.Ok(new { Address = baseAdd.ToString(), TotalBalance = amount });
+})
+    .WithName("Get Wallet Balance");
+
+app.MapPost("/connect", async ([FromBody] ConnectRequest request, IAppConnectDatabase appConnectDatabase) =>
+{
+    var appId = Guid.NewGuid().ToString();
+
+    await appConnectDatabase.SaveAppConnectionAsync(new AppConnect()
+    {
+        AppId = appId,
+        Name = request.Name,
+        ConnectionStatus = (int)ConnectionStatus.Pending
+    });
+
+    return Results.Ok(new { AppId = appId });
+
+})
+    .WithName("Connect");
+
+app.MapGet("/connect/{appId}/status", async (string appId, IAppConnectDatabase appConnectDatabase) =>
+{
+    var appConnect = await appConnectDatabase.GetAppConnectionByAppIdAsync(appId);
+
+    if (appConnect == null) 
+        return Results.NotFound();
+    else
+        return Results.Ok(new { 
+            Status = ((ConnectionStatus)appConnect.ConnectionStatus).ToString(),
+            StatusCode = appConnect.ConnectionStatus
+        });
+})
+    .WithName("Check Connection Status");
 
 app.Run();
 
 
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+internal record ConnectRequest(string Name);

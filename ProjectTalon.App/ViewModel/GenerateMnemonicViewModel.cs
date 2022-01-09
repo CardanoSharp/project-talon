@@ -19,7 +19,7 @@ namespace ProjectTalon.App.ViewModel
         void HandleValidSubmit();
         void RecordedConfirmed();
 
-        public WalletCreationRequest WalletCreationForm { get; set; }
+        WalletCreationRequest WalletCreationForm { get; set; }
         bool ConsentToSeeMnumonic { get; set; }
         bool DoneSeeingMnumonic { get; set; }
         string Mnemonic { get; set; }
@@ -70,7 +70,7 @@ namespace ProjectTalon.App.ViewModel
         public async void HandleValidSubmit()
         {
             await _walletService.AddWallet(WalletCreationForm.Name, WalletCreationForm.RecoveryPhrase, WalletCreationForm.SpendingPassword);
-            _uriHelper.NavigateTo("wallet/dashboard");
+            _uriHelper.NavigateTo("");
         }
 
         public void RecordedConfirmed()
