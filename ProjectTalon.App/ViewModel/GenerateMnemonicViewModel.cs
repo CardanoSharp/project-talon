@@ -1,15 +1,7 @@
 ﻿using CardanoSharp.Wallet;
-using CardanoSharp.Wallet.Enums;
-using CardanoSharp.Wallet.Extensions.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using ProjectTalon.App.Models;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProjectTalon.App.ViewModel
 {
