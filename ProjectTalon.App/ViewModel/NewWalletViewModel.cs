@@ -1,16 +1,17 @@
 ﻿using CardanoSharp.Wallet;
-using CardanoSharp.Wallet.Enums;
-using CardanoSharp.Wallet.Extensions;
 using CardanoSharp.Wallet.Extensions.Models;
-using Newtonsoft.Json;
-using ProjectTalon.App.Enums;
+using CardanoSharp.Wallet.Models.Keys;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
-using SQLite;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
+using SQLite;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using CardanoSharp.Wallet.Enums;
+using CardanoSharp.Wallet.Extensions;
+using Newtonsoft.Json;
 
 namespace ProjectTalon.App.ViewModel
 {
@@ -31,7 +32,7 @@ namespace ProjectTalon.App.ViewModel
         public Task RestoreWallet { get; private set; }
 
         public NewWalletViewModel(
-            IMnemonicService mnemonicService,
+            IMnemonicService mnemonicService, 
             WalletDatabase walletDatabase,
             WalletKeyDatabase walletKeyDatabase)
         {

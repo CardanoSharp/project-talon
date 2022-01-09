@@ -1,6 +1,8 @@
 ﻿using ProjectTalon.Core.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ProjectTalon.App.ViewModel
@@ -27,7 +29,7 @@ namespace ProjectTalon.App.ViewModel
         public async Task GetWallets()
         {
             Wallets = await _walletDatabase.GetWalletsAsync();
-            if (Wallets.Any())
+            if(Wallets.Any())
             {
                 CurrentWallet = 1;
             }

@@ -1,4 +1,9 @@
 ﻿using ProjectTalon.Core.Data.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjectTalon.Core.Data
 {
@@ -13,7 +18,7 @@ namespace ProjectTalon.Core.Data
         Task<int> DeleteWalletAsync(Wallet wallet);
     }
 
-    public class WalletDatabase : BaseDatabase, IWalletDatabase
+    public class WalletDatabase: BaseDatabase, IWalletDatabase
     {
         public WalletDatabase()
         {
