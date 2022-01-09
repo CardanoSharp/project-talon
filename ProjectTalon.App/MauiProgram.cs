@@ -1,16 +1,11 @@
 ﻿using CardanoSharp.Wallet;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui;
-using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
-using ProjectTalon.Core.Data;
-using ProjectTalon.App.ViewModel;
-using System;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Maui.LifecycleEvents;
+using ProjectTalon.App.ViewModel;
+using ProjectTalon.Core.Data;
 
 namespace ProjectTalon.App
 {
@@ -32,7 +27,7 @@ namespace ProjectTalon.App
 #if WINDOWS
                 lc.AddWindows(w =>
                 {
-                    w.OnLaunched((_,_) =>
+                    w.OnLaunched((_, _) =>
                     {
                         TalonApi.Start();
                     });
