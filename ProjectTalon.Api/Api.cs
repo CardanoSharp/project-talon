@@ -4,7 +4,10 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Mvc;
+using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 
 namespace ProjectTalon.Api;
 
@@ -13,8 +16,44 @@ public static class Api
     public static void ConfigureApi(this WebApplication app)
     {
         app.MapGet("/mnemonic/{size}", GenerateMnemonic);
-
         app.MapGet("/wallet/{id}/balance", GetWalletBalance);
+        app.MapPost("/connect", Connect);
+        app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
+    }
+
+    private static async Task<IResult> Connect([FromBody] ConnectRequest request,
+        IAppConnectDatabase appConnectDatabase)
+    {
+        try
+        {
+            var appId = Guid.NewGuid().ToString();
+
+            await appConnectDatabase.SaveAppConnectionAsync(new AppConnect
+            {
+                AppId = appId,
+                Name = request.Name,
+                ConnectionStatus = (int) ConnectionStatus.Pending
+            });
+
+            return Results.Ok(new {AppId = appId});
+        }
+        catch (Exception e)
+        {
+            return Results.Problem(e.Message);
+        }
+    }
+
+    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase)
+    {
+        var appConnect = await appConnectDatabase.GetAppConnectionByAppIdAsync(appId);
+
+        if (appConnect is null)
+            return Results.NotFound();
+        return Results.Ok(new
+        {
+            Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
+            StatusCode = appConnect.ConnectionStatus
+        });
     }
 
     private static IResult GenerateMnemonic(int size)
