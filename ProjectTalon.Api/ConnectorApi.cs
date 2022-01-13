@@ -11,17 +11,16 @@ using ProjectTalon.Core.Data.Models;
 
 namespace ProjectTalon.Api;
 
-public static class Api
+public static class ConnectorApi
 {
-    public static void ConfigureApi(this WebApplication app)
+    public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/mnemonic/{size}", GenerateMnemonic);
-        app.MapGet("/wallet/{id}/balance", GetWalletBalance);
         app.MapPost("/connect", Connect);
         app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
     }
 
-    private static async Task<IResult> Connect([FromBody] ConnectRequest request,
+    private static async Task<IResult> Connect(
+        [FromBody] ConnectRequest request,
         IAppConnectDatabase appConnectDatabase)
     {
         try

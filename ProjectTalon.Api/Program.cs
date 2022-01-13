@@ -1,4 +1,5 @@
 using Blockfrost.Api.Extensions;
+using CardanoSharp.Wallet.Models.Addresses;
 using ProjectTalon.Api;
 using ProjectTalon.Core.Data;
 
@@ -26,9 +27,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.ConfigureApi();
+ConnectorApi.AddEndpoints(app);
+AccountsApi.AddEndpoints(app);
+AddressesApi.AddEndpoints(app);
+AssetsApi.AddEndpoints(app);
+BlocksApi.AddEndpoints(app);
+EpochsApi.AddEndpoints(app);
+LedgerApi.AddEndpoints(app);
+MetadataApi.AddEndpoints(app);
+NetworkApi.AddEndpoints(app);
+MetadataApi.AddEndpoints(app);
+PoolsApi.AddEndpoints(app);
+ScriptsApi.AddEndpoints(app);
+TransactionsApi.AddEndpoints(app);
 
 app.Run();
-
 
 internal record ConnectRequest(string Name);
