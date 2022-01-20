@@ -17,7 +17,7 @@ public class AssetsApi
         app.MapGet("/blockfrost/assets/policy/{policyId}", GetByPolicyId);
     }
 
-    private static async Task<IResult> GetAssets(int count, int page, string order, IAssetsService cardanoService)
+    private static async Task<IResult> GetAssets(IAssetsService cardanoService, int count = 100, int page = 1, string order = "asc")
     {
         try
         {
