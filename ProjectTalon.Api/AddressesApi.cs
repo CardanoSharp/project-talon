@@ -20,7 +20,7 @@ public static class AddressesApi
     private static async Task<IResult> GetUtxos(
         IWalletDatabase walletdatabase,
         IWalletKeyDatabase keyDatabase,
-        ICardanoService cardanoService)
+        IAddressesService cardanoService)
     {
         try
         {
@@ -34,7 +34,7 @@ public static class AddressesApi
             AddressUtxoContentResponseCollection response;
             try
             {
-                response = await cardanoService.Addresses.GetUtxosAsync(address);
+                response = await cardanoService.GetUtxosAsync(address);
             }
             catch
             {
@@ -52,7 +52,7 @@ public static class AddressesApi
     private static async Task<IResult> GetInformation(
         IWalletDatabase walletdatabase,
         IWalletKeyDatabase keyDatabase,
-        ICardanoService cardanoService)
+        IAddressesService cardanoService)
     {
         try
         {
@@ -66,7 +66,7 @@ public static class AddressesApi
             AddressContentResponse response;
             try
             {
-                response = await cardanoService.Addresses.GetAddressesAsync(address);
+                response = await cardanoService.GetAddressesAsync(address);
             }
             catch
             {
