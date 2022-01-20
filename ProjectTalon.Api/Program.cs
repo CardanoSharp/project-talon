@@ -1,11 +1,7 @@
 using Blockfrost.Api.Extensions;
-using Blockfrost.Api.Services;
-using CardanoSharp.Wallet;
-using CardanoSharp.Wallet.Enums;
-using CardanoSharp.Wallet.Extensions.Models;
-using CardanoSharp.Wallet.Models.Keys;
+using CardanoSharp.Wallet.Models.Addresses;
+using ProjectTalon.Api;
 using ProjectTalon.Core.Data;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +14,7 @@ builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 
 builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
 builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
+builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
 
 var app = builder.Build();
 
@@ -30,46 +27,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/mnemonic/{size}", (int size) =>
-{
-    return new MnemonicService().Generate(size);
-})
-.WithName("GenerateMnemonic");
-
-app.MapGet("/wallet/{id}/balance", async (int id, IWalletDatabase walletdatabase, IWalletKeyDatabase keyDatabase, ICardanoService cardanoService) =>
-{
-    var wallets = await walletdatabase.GetWalletsAsync();
-    var wallet = await keyDatabase.GetWalletKeysAsync(id);
-    var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-
-    var payment = publicKey
-        .Derive(RoleType.ExternalChain)
-        .Derive(0);
-
-    var stake = publicKey
-        .Derive(RoleType.Staking)
-        .Derive(0);
-
-    var baseAdd = new AddressService()
-        .GetAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet, AddressType.Base);
-    long amount = 0;
-    try
-    {
-        var response = await cardanoService.Addresses.GetUtxosAsync(baseAdd.ToString());
-        amount = response.SelectMany(m => m.Amount).Where(m => m.Unit == "lovelace").Sum(m => long.Parse(m.Quantity));
-    }
-    catch
-    {
-        amount = -1;
-    }
-
-    return new { Address = baseAdd.ToString(), TotalBalance = amount };
-});
+ConnectorApi.AddEndpoints(app);
+AccountsApi.AddEndpoints(app);
+AddressesApi.AddEndpoints(app);
+AssetsApi.AddEndpoints(app);
+BlocksApi.AddEndpoints(app);
+EpochsApi.AddEndpoints(app);
+LedgerApi.AddEndpoints(app);
+MetadataApi.AddEndpoints(app);
+NetworkApi.AddEndpoints(app);
+MetadataApi.AddEndpoints(app);
+PoolsApi.AddEndpoints(app);
+ScriptsApi.AddEndpoints(app);
+TransactionsApi.AddEndpoints(app);
 
 app.Run();
 
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+internal record ConnectRequest(string Name);

@@ -6,8 +6,13 @@
 
         public BaseDatabase()
         {
-            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Talon.db3");
-            database = new SQLite.SQLiteAsyncConnection(dbPath);
+            var dbName = "Talon.db3";
+            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Talon");
+
+            if(!Directory.Exists(dbPath))
+                Directory.CreateDirectory(dbPath);
+
+            database = new SQLite.SQLiteAsyncConnection(Path.Combine(dbPath, dbName), true);
         }
     }
 }

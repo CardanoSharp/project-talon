@@ -60,6 +60,7 @@ namespace ProjectTalon.App
             //SQLite
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
             builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
+            builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
 
             var app = builder.Build();
 

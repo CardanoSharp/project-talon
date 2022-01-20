@@ -1,4 +1,9 @@
 ﻿using SQLite;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjectTalon.Core.Data.Models
 {
@@ -7,7 +12,7 @@ namespace ProjectTalon.Core.Data.Models
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public string Name { get; set; }
-        public string AppId { get; set; }
-        public bool IsAllowed { get; set; }
+        public string AppId { get; set; }   
+        public int ConnectionStatus { get; set; }
     }
 }
