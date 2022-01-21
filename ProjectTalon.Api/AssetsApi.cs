@@ -2,6 +2,8 @@
 using Blockfrost.Api.Models;
 using Blockfrost.Api.Services;
 using Blockfrost.Api.Services.Extensions;
+using CardanoSharp.Koios.Sdk;
+using CardanoSharp.Koios.Sdk.Contracts;
 
 namespace ProjectTalon.Api;
 
@@ -9,35 +11,30 @@ public class AssetsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/blockfrost/assets", GetAssets);
-        app.MapGet("/blockfrost/assets/{asset}", GetInfo);
-        app.MapGet("/blockfrost/assets/{asset}/history", GetHistory);
-        app.MapGet("/blockfrost/assets/{asset}/transaction", GetTransactions);
-        app.MapGet("/blockfrost/assets/{asset}/addresses", GetAddresses);
-        app.MapGet("/blockfrost/assets/policy/{policyId}", GetByPolicyId);
+        app.MapGet("/assets/addresses/{policyId}/{assetName}", GetAddresses);
+        app.MapGet("/assets/info/{policyId}/{assetName}", GetInfo);
+        app.MapGet("/assets/transaction/{policyId}/{assetName}", GetTransactions);
     }
 
-    private static async Task<IResult> GetAssets(IAssetsService cardanoService, int count = 100, int page = 1, string order = "asc")
+    private static async Task<IResult> GetAddresses(
+        IAssetClient cardanoClient,
+        string policyId,
+        string assetName,
+        int limit = 25, 
+        int offset = 0)
     {
         try
         {
-            var orderBy = order switch
-            {
-                "asc" => ESortOrder.Asc,
-                "desc" => ESortOrder.Desc,
-                _ => ESortOrder.Asc
-            };
-
-            AssetsResponseCollection response;
+            var response = Array.Empty<AssetAddress>();
             try
             {
-                response = await cardanoService.GetAssetsAsync(count, page, orderBy);
+                response = await cardanoClient.GetAddresses(policyId, assetName, limit, offset);
             }
             catch
             {
-                response = null;
+                // ignored
             }
-
+            
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -45,22 +42,26 @@ public class AssetsApi
             return Results.Problem(e.Message);
         }
     }
-    
-    private static async Task<IResult> GetInfo(string asset, IAssetsService cardanoService)
+
+    private static async Task<IResult> GetInfo(
+        IAssetClient cardanoClient,
+        string policyId,
+        string assetName,
+        int limit = 25, 
+        int offset = 0)
     {
         try
         {
-
-            AssetResponse response;
+            var response = Array.Empty<AssetInformation>();
             try
             {
-                response = await cardanoService.GetAssetsAsync(asset);
+                response = await cardanoClient.GetInfo(policyId, assetName, limit, offset);
             }
             catch
             {
-                response = null;
+                // ignored
             }
-
+            
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -68,91 +69,26 @@ public class AssetsApi
             return Results.Problem(e.Message);
         }
     }
-    
-    private static async Task<IResult> GetHistory(string asset, IAssetsService cardanoService)
+
+    private static async Task<IResult> GetTransactions(
+        IAssetClient cardanoClient,
+        string policyId,
+        string assetName,
+        int limit = 25, 
+        int offset = 0)
     {
         try
         {
-
-            AssetHistoryResponseCollection response;
+            var response = Array.Empty<AssetTransaction>();
             try
             {
-                response = await cardanoService.GetHistoryAsync(asset);
+                response = await cardanoClient.GetTransactions(policyId, assetName, limit, offset);
             }
             catch
             {
-                response = null;
+                // ignored
             }
-
-            return Results.Ok(response);
-        }
-        catch (Exception e)
-        {
-            return Results.Problem(e.Message);
-        }
-    }
-    
-    private static async Task<IResult> GetTransactions(string asset, IAssetsService cardanoService)
-    {
-        try
-        {
-
-            AssetTransactionsResponseCollection response;
-            try
-            {
-                response = await cardanoService.GetTransactionsAsync(asset);
-            }
-            catch
-            {
-                response = null;
-            }
-
-            return Results.Ok(response);
-        }
-        catch (Exception e)
-        {
-            return Results.Problem(e.Message);
-        }
-    }
-    
-    private static async Task<IResult> GetAddresses(string asset, IAssetsService cardanoService)
-    {
-        try
-        {
-
-            AssetAddressesResponseCollection response;
-            try
-            {
-                response = await cardanoService.GetAddressesAsync(asset);
-            }
-            catch
-            {
-                response = null;
-            }
-
-            return Results.Ok(response);
-        }
-        catch (Exception e)
-        {
-            return Results.Problem(e.Message);
-        }
-    }
-    
-    private static async Task<IResult> GetByPolicyId(string policyId, IAssetsService cardanoService)
-    {
-        try
-        {
-
-            AssetPolicyResponseCollection response;
-            try
-            {
-                response = await cardanoService.GetPolicyAsync(policyId);
-            }
-            catch
-            {
-                response = null;
-            }
-
+            
             return Results.Ok(response);
         }
         catch (Exception e)

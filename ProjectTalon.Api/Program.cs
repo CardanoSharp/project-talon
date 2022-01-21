@@ -1,4 +1,5 @@
 using Blockfrost.Api.Extensions;
+using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Wallet.Models.Addresses;
 using ProjectTalon.Api;
 using ProjectTalon.Core.Data;

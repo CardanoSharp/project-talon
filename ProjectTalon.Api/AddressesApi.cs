@@ -1,9 +1,9 @@
-﻿using Blockfrost.Api.Services;
-using CardanoSharp.Wallet;
+﻿using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using ProjectTalon.Core.Data;
 using System.Text.Json;
-using Blockfrost.Api.Models;
+using CardanoSharp.Koios.Sdk;
+using CardanoSharp.Koios.Sdk.Contracts;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
 
@@ -13,36 +13,23 @@ public static class AddressesApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/blockfrost/address/utxos", GetUtxos);
-        app.MapGet("/blockfrost/address/info", GetInformation);
-        app.MapGet("/blockfrost/address/details", GetDetails);
+        app.MapGet("/address", GetAddress);
+        app.MapGet("/address/info", GetInformation);
     }
 
-    private static async Task<IResult> GetUtxos(
-        IWalletDatabase walletdatabase,
-        IWalletKeyDatabase keyDatabase,
-        IAddressesService cardanoService)
+    private static async Task<IResult> GetAddress(
+        IWalletKeyDatabase keyDatabase, 
+        string? addressIndex = null)
     {
         try
         {
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            if (publicKey is null)
-                throw new Exception("Wallet not found");
-
-            var address = await GetWalletAddress(publicKey);
+            int? index = null;
+            if (int.TryParse(addressIndex, out _))
+            {
+                index = int.Parse(addressIndex);
+            }
             
-            AddressUtxoContentResponseCollection response;
-            try
-            {
-                response = await cardanoService.GetUtxosAsync(address);
-            }
-            catch
-            {
-                response = null;
-            }
-
-            return Results.Ok(response);
+            return Results.Ok(await GetWalletAddress(keyDatabase, index));
         }
         catch (Exception e)
         {
@@ -51,27 +38,22 @@ public static class AddressesApi
     }
 
     private static async Task<IResult> GetInformation(
-        IWalletDatabase walletdatabase,
         IWalletKeyDatabase keyDatabase,
-        IAddressesService cardanoService)
+        IAddressClient cardanoClient,
+        string? address = null)
     {
         try
         {
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            if (publicKey is null)
-                throw new Exception("Wallet not found");
+            address ??= await GetWalletAddress(keyDatabase);
 
-            var address = await GetWalletAddress(publicKey);
-            
-            AddressContentResponse response;
+            var response = Array.Empty<AddressInformation>();
             try
             {
-                response = await cardanoService.GetAddressesAsync(address);
+                if (address != null) response = await cardanoClient.GetAddressInformation(address);
             }
             catch
             {
-                response = null;
+                // ignored
             }
 
             return Results.Ok(response);
@@ -82,40 +64,25 @@ public static class AddressesApi
         }
     }
 
-    private static async Task<string> GetWalletAddress(PublicKey publicKey)
+    private static async Task<string?> GetWalletAddress(IWalletKeyDatabase keyDatabase, int? addressIndex = null)
     {
+        addressIndex ??= 0;
+            
+        var wallet = await keyDatabase.GetWalletKeysAsync(1);
+        var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+        if (publicKey is null)
+            throw new Exception("Wallet not found");
         var payment = publicKey
             .Derive(RoleType.ExternalChain)
-            .Derive(0);
+            .Derive((int)addressIndex);
 
         var stake = publicKey
             .Derive(RoleType.Staking)
             .Derive(0);
 
-        var baseAddr = new AddressService()
-            .GetAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet, AddressType.Base);
+        var address = new AddressService()
+            .GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet);
 
-        return baseAddr.ToString();
-    }
-  
-    private static async Task<IResult> GetDetails(IAddressesService addressesService, IWalletKeyDatabase keyDatabase,
-        string? userAddress = null)
-    {
-        if (userAddress is null)
-        {
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = await GetWalletAddress(publicKey);
-            return Results.Ok((await addressesService.GetTotalAsync(address)));
-        }
-        
-        try
-        {
-            return Results.Ok((await addressesService.GetTotalAsync(userAddress)));
-        }
-        catch (Exception e)
-        {
-            return Results.Problem(e.Message);
-        }
+        return address.ToString();
     }
 }
