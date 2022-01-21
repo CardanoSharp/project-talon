@@ -6,9 +6,6 @@ using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
 using SQLite;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,7 +24,7 @@ namespace ProjectTalon.App.Services
         private IWalletKeyDatabase _walletKeyDatabase;
 
         public WalletService(
-            IMnemonicService mnemonicService, 
+            IMnemonicService mnemonicService,
             IWalletKeyDatabase walletKeyDatabase,
             IWalletDatabase walletDatabase)
         {
@@ -44,39 +41,39 @@ namespace ProjectTalon.App.Services
             int walletId = 0;
             int walletKeyId = 0;
 
-            if(await _walletDatabase.WalletExistsAsync(name))
+            if (await _walletDatabase.WalletExistsAsync(name))
             {
                 throw new Exception("Wallet already exists");
             }
 
             //await database.RunInTransactionAsync(async (SQLiteConnection transaction) =>
             //{
-                //transaction.BeginTransaction();
-                int accountIx = 0;
+            //transaction.BeginTransaction();
+            int accountIx = 0;
 
-                walletId = await _walletDatabase.SaveWalletAsync(new Wallet
-                {
-                    Name = name,
-                    WalletType = (int)WalletType.HD,
-                });
+            walletId = await _walletDatabase.SaveWalletAsync(new Wallet
+            {
+                Name = name,
+                WalletType = (int)WalletType.HD,
+            });
 
-                newlyCreatedWallet = await _walletDatabase.GetWalletByNameAsync(name);
+            newlyCreatedWallet = await _walletDatabase.GetWalletByNameAsync(name);
 
-                var accountNode = mnemonic.GetMasterNode()
-                    .Derive(PurposeType.Shelley)
-                    .Derive(CoinType.Ada)
-                    .Derive(accountIx);
-                accountNode.SetPublicKey();
+            var accountNode = mnemonic.GetMasterNode()
+                .Derive(PurposeType.Shelley)
+                .Derive(CoinType.Ada)
+                .Derive(accountIx);
+            accountNode.SetPublicKey();
 
-                walletKeyId = await _walletKeyDatabase.SaveWalletAsync(new WalletKey
-                {
-                    WalletId = newlyCreatedWallet.Id,
-                    KeyType = (int)KeyType.Account,
-                    Skey = JsonSerializer.Serialize(accountNode.PrivateKey.Encrypt(spendingPassword)),
-                    Vkey = JsonSerializer.Serialize(accountNode.PublicKey),
-                    KeyIndex = accountIx,
-                    AccountIndex = accountIx
-                });
+            walletKeyId = await _walletKeyDatabase.SaveWalletAsync(new WalletKey
+            {
+                WalletId = newlyCreatedWallet.Id,
+                KeyType = (int)KeyType.Account,
+                Skey = JsonSerializer.Serialize(accountNode.PrivateKey.Encrypt(spendingPassword)),
+                Vkey = JsonSerializer.Serialize(accountNode.PublicKey),
+                KeyIndex = accountIx,
+                AccountIndex = accountIx
+            });
 
             //    transaction.Commit();
             //});

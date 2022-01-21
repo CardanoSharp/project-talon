@@ -15,6 +15,7 @@ public static class AddressesApi
     {
         app.MapGet("/blockfrost/address/utxos", GetUtxos);
         app.MapGet("/blockfrost/address/info", GetInformation);
+        app.MapGet("/blockfrost/address/details", GetDetails);
     }
 
     private static async Task<IResult> GetUtxos(
@@ -95,5 +96,25 @@ public static class AddressesApi
             .GetAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet, AddressType.Base);
 
         return baseAddr.ToString();
+    }
+    private static async Task<IResult> GetDetails(IAddressesService addressesService, IWalletKeyDatabase keyDatabase,
+        string? userAddress = null)
+    {
+        if (userAddress is null)
+        {
+            var wallet = await keyDatabase.GetWalletKeysAsync(1);
+            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+            var address = await GetWalletAddress(publicKey);
+            return Results.Ok((await addressesService.GetTotalAsync(address)));
+        }
+        
+        try
+        {
+            return Results.Ok((await addressesService.GetTotalAsync(userAddress)));
+        }
+        catch (Exception e)
+        {
+            return Results.Problem(e.Message);
+        }
     }
 }
