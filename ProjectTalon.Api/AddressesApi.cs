@@ -97,6 +97,7 @@ public static class AddressesApi
 
         return baseAddr.ToString();
     }
+  
     private static async Task<IResult> GetDetails(IAddressesService addressesService, IWalletKeyDatabase keyDatabase,
         string? userAddress = null)
     {
