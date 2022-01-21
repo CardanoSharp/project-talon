@@ -13,6 +13,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 
+builder.Services.AddKoios("https://koios-api.testnet.dandelion.link/rpc");
+
 builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
 builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
 builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
