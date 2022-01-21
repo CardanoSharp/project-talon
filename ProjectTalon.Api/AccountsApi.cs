@@ -25,9 +25,7 @@ public static class AccountsApi
         {
             if (stakeaddress is not null) return Results.Ok(await accountsService.GetRewardsAsync(stakeaddress));
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = GetStakeAddress(publicKey);
+            var address = await GetStakeAddress(keyDatabase);
             return Results.Ok(await accountsService.GetRewardsAsync(address));
         }
         catch (Exception e)
@@ -43,9 +41,7 @@ public static class AccountsApi
         {
             if (stakeaddress is not null) return Results.Ok(await accountsService.GetHistoryAsync(stakeaddress));
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = GetStakeAddress(publicKey);
+            var address = await GetStakeAddress(keyDatabase);
             return Results.Ok(await accountsService.GetHistoryAsync(address));
         }
         catch (Exception e)
@@ -61,9 +57,7 @@ public static class AccountsApi
         {
             if (stakeaddress is not null) return Results.Ok(await accountsService.GetDelegationsAsync(stakeaddress));
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = GetStakeAddress(publicKey);
+            var address = await GetStakeAddress(keyDatabase);
             return Results.Ok(await accountsService.GetDelegationsAsync(address));
         }
         catch (Exception e)
@@ -80,9 +74,7 @@ public static class AccountsApi
         {
             if (stakeaddress is not null) return Results.Ok(await accountsService.GetRegistrationsAsync(stakeaddress));
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = GetStakeAddress(publicKey);
+            var address = await GetStakeAddress(keyDatabase);
             return Results.Ok(await accountsService.GetRegistrationsAsync(address));
         }
         catch (Exception e)
@@ -90,7 +82,7 @@ public static class AccountsApi
             return Results.Problem(e.Message);
         }
     }
-    
+
     private static async Task<IResult> GetWithdrawls(IAccountsService accountsService,
         IWalletKeyDatabase keyDatabase,
         string? stakeaddress = null)
@@ -99,9 +91,7 @@ public static class AccountsApi
         {
             if (stakeaddress is not null) return Results.Ok(await accountsService.GetWithdrawalsAsync(stakeaddress));
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
-            var address = GetStakeAddress(publicKey);
+            var address = await GetStakeAddress(keyDatabase);
             return Results.Ok(await accountsService.GetWithdrawalsAsync(address));
         }
         catch (Exception e)
@@ -110,8 +100,10 @@ public static class AccountsApi
         }
     }
 
-    private static string? GetStakeAddress(PublicKey publicKey)
+    private static async Task<string?> GetStakeAddress(IWalletKeyDatabase keyDatabase)
     {
+        var wallet = await keyDatabase.GetWalletKeysAsync(1);
+        var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
         var payment = publicKey
             .Derive(RoleType.ExternalChain)
             .Derive(0);
