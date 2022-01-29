@@ -1,4 +1,5 @@
-﻿using CardanoSharp.Wallet;
+﻿using Blockfrost.Api.Extensions;
+using CardanoSharp.Wallet;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls.Hosting;
@@ -57,10 +58,13 @@ namespace ProjectTalon.App
             builder.Services.AddTransient<IWalletLayoutViewModel, WalletLayoutViewModel>();
             builder.Services.AddTransient<Services.IWalletService, Services.WalletService>();
 
+            builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
+
             //SQLite
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
             builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
             builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
+            builder.Services.AddTransient<ITransactionRequestDatabase, TransactionRequestDatabase>();
 
             var app = builder.Build();
 

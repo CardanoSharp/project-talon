@@ -27,7 +27,7 @@ public static class ConnectorApi
         {
             var appId = Guid.NewGuid().ToString();
 
-            await appConnectDatabase.SaveAppConnectionAsync(new AppConnect
+            await appConnectDatabase.SaveAsync(new AppConnect
             {
                 AppId = appId,
                 Name = request.Name,
@@ -44,7 +44,7 @@ public static class ConnectorApi
 
     private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase)
     {
-        var appConnect = await appConnectDatabase.GetAppConnectionByAppIdAsync(appId);
+        var appConnect = await appConnectDatabase.GetByAppIdAsync(appId);
 
         if (appConnect is null)
             return Results.NotFound();

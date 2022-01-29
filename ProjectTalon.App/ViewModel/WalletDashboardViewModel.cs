@@ -22,10 +22,12 @@ namespace ProjectTalon.App.ViewModel
         List<Token> Tokens { get; set; }
         List<TransactionSummary> Transactions { get; set; }
         List<AppConnect> Connections { get; set; }
+        List<TransactionRequest> TransactionRequests { get; set; }
         void GoTo(string url);
         Task FetchDashBoard();
         Task<int> GetWalletCount();
         void UpdateConnection(int id, ConnectionStatus connectionStatus);
+        void UpdateTransactionRequest(int id, TransactionRequestStatus transactionRequestStatus);
     }
 
     public class WalletDashboardViewModel : IWalletDashboardViewModel
@@ -33,13 +35,15 @@ namespace ProjectTalon.App.ViewModel
         private IWalletDatabase _walletDatabase;
         private IWalletKeyDatabase _walletKeyDatabase;
         private IAppConnectDatabase _appConnectDatabase;
+        private ITransactionRequestDatabase _transactionRequestDatabase;
         private NavigationManager _uriHelper;
         public WalletSummary WalletSummary { get; set; }
         public List<Token> Tokens { get; set; }
         public List<TransactionSummary> Transactions { get; set; }
 
         private List<AppConnect> _connections = new List<AppConnect>();
-        public List<AppConnect> Connections {
+        public List<AppConnect> Connections
+        {
             get => _connections;
             set
             {
@@ -51,17 +55,34 @@ namespace ProjectTalon.App.ViewModel
             }
         }
 
+        private List<TransactionRequest> _transactionRequests = new List<TransactionRequest>();
+        public List<TransactionRequest> TransactionRequests
+        {
+            get => _transactionRequests;
+            set
+            {
+                if (value != _transactionRequests)
+                {
+                    _transactionRequests = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TransactionRequests)));
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public WalletDashboardViewModel(
-            IWalletDatabase walletDatabase, 
+            IWalletDatabase walletDatabase,
             IWalletKeyDatabase walletKeyDatabase,
             IAppConnectDatabase appConnectDatabase,
+            ITransactionRequestDatabase transactionRequestDatabase,
             NavigationManager uriHelper)
         {
             _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
             _appConnectDatabase = appConnectDatabase;
+            _transactionRequestDatabase = transactionRequestDatabase;
+
             _uriHelper = uriHelper;
         }
 
@@ -101,6 +122,7 @@ namespace ProjectTalon.App.ViewModel
                     };
 
                     GetConnections();
+                    GetTransactionRequests();
                 }
             }
         }
@@ -112,19 +134,53 @@ namespace ProjectTalon.App.ViewModel
 
         private async Task GetConnections()
         {
-            while(true)
+            while (true)
             {
-                Connections = await _appConnectDatabase.GetAppConnectionsAsync();
+                Connections = await _appConnectDatabase.ListAsync();
+                await Task.Delay(5000);
+            }
+        }
+
+        private async Task GetTransactionRequests()
+        {
+            while (true)
+            {
+                var transactionRequests = await _transactionRequestDatabase.ListAsync();
+
+                var apps = new List<AppConnect>();
+                foreach(var tr in transactionRequests)
+                {
+                    var app = apps.FirstOrDefault(x => x.AppId.Equals(tr.AppId));
+                    if(app is null)
+                    {
+                        app = await _appConnectDatabase.GetByAppIdAsync(tr.AppId);
+                    }
+                    tr.App = app;
+                }
+
+                TransactionRequests = transactionRequests;
+
                 await Task.Delay(5000);
             }
         }
 
         public async void UpdateConnection(int id, ConnectionStatus connectionStatus)
         {
-            var appConnect = await _appConnectDatabase.GetAppConnectionAsync(id);
+            var appConnect = await _appConnectDatabase.GetAsync(id);
             appConnect.ConnectionStatus = (int)connectionStatus;
 
-            await _appConnectDatabase.SaveAppConnectionAsync(appConnect);
+            await _appConnectDatabase.SaveAsync(appConnect);
+        }
+
+        public async void UpdateTransactionRequest(int id, TransactionRequestStatus transactionRequestStatus)
+        {
+            var transactionRequest = await _transactionRequestDatabase.GetAsync(id);
+            transactionRequest.StatusId = (int)transactionRequestStatus;
+
+            if(transactionRequestStatus == TransactionRequestStatus.Accepted)
+            {
+
+            }
         }
     }
 }

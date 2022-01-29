@@ -73,4 +73,8 @@
 	  <ProjectReference Include="..\ProjectTalon.Core\ProjectTalon.Core.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Components\Index\" />
+	</ItemGroup>
+
 </Project>

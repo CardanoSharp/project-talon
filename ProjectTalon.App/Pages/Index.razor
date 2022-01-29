@@ -1,8 +1,11 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 @page "/"
+@using Newtonsoft.Json
 @using ProjectTalon.App.ViewModel
 @using ProjectTalon.App.Enums
 @using ProjectTalon.Core.Common
+@using ProjectTalon.Core.Data.Models
+@using ProjectTalon.Core.Requests
 @inject IWalletDashboardViewModel ViewModel
 
 @if(ViewModel.WalletSummary is null)
@@ -25,32 +28,107 @@
         
 
 
-    <h2>Connections</h2>
+    
 
-    <div>
-        @if (ViewModel.Connections.Any())
-        {
-            @foreach (var conn in ViewModel.Connections)
+    <div class="row">
+        <div class="col-6">
+            <h2>Connections</h2>
+            <div>
+                @if (ViewModel.Connections.Any())
+                {
+                    @foreach (var conn in ViewModel.Connections)
+                    {
+                        <Card>
+                            <div class="row mb-2">
+                                <div class="col-6">@conn.Name</div>
+                                <div class="col-6">
+                                    @if ((int)conn.ConnectionStatus > 0)
+                                    {
+                                        <Badge Text=@(((ConnectionStatus)conn.ConnectionStatus).ToString()) Theme="@(conn.ConnectionStatus == (int)ConnectionStatus.Approved ? "success" : "danger")" />
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-success" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Approved)">Approve</button>
+                                        <button class="btn btn-default" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Denied)">Deny</button>
+                                    }
+                                </div>
+                            </div>
+                        </Card>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-6">
+            <h2>Transaction Requests</h2>
+            <div>
+                @if (ViewModel.TransactionRequests.Any())
+                {
+                    @foreach (var tr in ViewModel.TransactionRequests)
+                    {
+                        <Card>
+                            <div class="row mb-2">
+                                @switch(tr.StatusId)
+                                {
+                                    case (int)TransactionRequestStatus.Pending:
+                                        <div class="col-12 mb-3">
+                                            <small><strong>Application:</strong></small> <br/>@tr.App.Name</div>
+                                        <div class="col-12">
+                                            <small><strong>Output:</strong></small>
+                                            <div class="row">
+                                            @foreach(var o in GetOutput(tr))
+                                                {
+                                                    <pre>
+                                                    <code>
+    {
+        Address: @o.Address,
+        Assets: [
+            @foreach(var asset in o.Assets)
             {
-                <Card>
-                    <div class="row mb-2">
-                        <div class="col-6">@conn.Name</div>
-                        <div class="col-6">
-                            @if ((int)conn.ConnectionStatus > 0)
-                            {
-                                <Badge Text=@(((ConnectionStatus)conn.ConnectionStatus).ToString()) Theme="@(conn.ConnectionStatus == (int)ConnectionStatus.Approved ? "success" : "danger")" />
-                            }
-                            else
-                            {
-                                <button class="btn btn-success" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Approved)">Approve</button>
-                                <button class="btn btn-danger" @onclick="() => ViewModel.UpdateConnection(conn.Id, ConnectionStatus.Denied)">Deny</button>
-                            }
-                        </div>
-                    </div>
-                </Card>
+                <span>         { Name: @asset.AssetName, Quantity: @asset.Quantity },</span>
             }
-        }
+
+        ]
+    }
+                                                    </code>
+                                                    </pre>
+                                                }
+                                            </div>
+                                        </div>
+                                            <div class="col-12">
+                                                @if (@GetMetadata(tr) is not null)
+                                                {
+                                                    <span>Metadata: @GetMetadata(tr)</span>
+                                                }
+                                        </div>
+                                        <div class="col-12">
+                                            <button 
+                                                class="btn btn-success" 
+                                                @onclick="() => ViewModel.UpdateTransactionRequest(tr.Id, TransactionRequestStatus.Accepted)">
+                                                Submit
+                                            </button>
+                                            <button 
+                                                class="btn btn-default" 
+                                                @onclick="() => ViewModel.UpdateTransactionRequest(tr.Id, TransactionRequestStatus.Rejected)">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                        break;
+                                    default:
+                                        <div class="col-6">@tr.App.Name</div>
+                                        <div class="col-6">
+                                            <Badge Text=@(((ConnectionStatus)tr.StatusId).ToString()) Theme="@(tr.StatusId == (int)tr.StatusId ? "success" : "danger")" />
+                                        </div>
+                                        break;
+                                }
+                            </div>
+                        </Card>
+                    }
+                }
+            </div>
+        </div>
     </div>
+
+
 </div>
 
 }
@@ -168,5 +246,12 @@
         ViewModel.PropertyChanged += (o, e) => StateHasChanged();
     }
 
+    
+    private List<TransactionSubmitOutputRequest> GetOutput(TransactionRequest transactionRequest) =>
+        JsonConvert.DeserializeObject<List<TransactionSubmitOutputRequest>>(
+            (JsonConvert.DeserializeObject<Dictionary<string, object>> (transactionRequest.Parameters))["Outputs"].ToString());
+
+    private string GetMetadata(TransactionRequest transactionRequest) =>
+        (JsonConvert.DeserializeObject<Dictionary<string, object>> (transactionRequest.Parameters)["Metadata"])?.ToString();
 }
 

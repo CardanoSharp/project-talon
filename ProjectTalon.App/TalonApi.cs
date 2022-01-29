@@ -16,7 +16,7 @@ namespace ProjectTalon.App
                 string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
                 _apiProcess.StartInfo.UseShellExecute = false;
-                _apiProcess.StartInfo.CreateNoWindow = true;
+                //_apiProcess.StartInfo.CreateNoWindow = true;
                 _apiProcess.StartInfo.FileName = $"{System.IO.Path.GetDirectoryName(strExeFilePath)}/bin/Debug/net6.0/ProjectTalon.Api.exe";
                 _apiProcess.Start();
             }

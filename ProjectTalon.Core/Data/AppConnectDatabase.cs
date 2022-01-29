@@ -4,11 +4,11 @@ namespace ProjectTalon.Core.Data
 {
     public interface IAppConnectDatabase
     {
-        Task<List<AppConnect>> GetAppConnectionsAsync();
-        Task<AppConnect> GetAppConnectionAsync(int id);
-        Task<AppConnect> GetAppConnectionByAppIdAsync(string appId);
-        Task<int> SaveAppConnectionAsync(AppConnect appConnect);
-        Task<int> DeleteAppConnectionAsync(AppConnect appConnect);
+        Task<List<AppConnect>> ListAsync();
+        Task<AppConnect> GetAsync(int id);
+        Task<AppConnect> GetByAppIdAsync(string appId);
+        Task<int> SaveAsync(AppConnect appConnect);
+        Task<int> DeleteAsync(AppConnect appConnect);
     }
 
     public class AppConnectDatabase : BaseDatabase, IAppConnectDatabase
@@ -18,26 +18,26 @@ namespace ProjectTalon.Core.Data
             database.CreateTableAsync<AppConnect>().Wait();
         }
 
-        public async Task<List<AppConnect>> GetAppConnectionsAsync()
+        public async Task<List<AppConnect>> ListAsync()
         {
             return await database.Table<AppConnect>().ToListAsync();
         }
 
-        public async Task<AppConnect> GetAppConnectionAsync(int id)
+        public async Task<AppConnect> GetAsync(int id)
         {
             return await database.Table<AppConnect>()
                             .Where(i => i.Id == id)
                             .FirstOrDefaultAsync();
         }
 
-        public async Task<AppConnect> GetAppConnectionByAppIdAsync(string appId)
+        public async Task<AppConnect> GetByAppIdAsync(string appId)
         {
             return await database.Table<AppConnect>()
                             .Where(i => i.AppId == appId)
                             .FirstOrDefaultAsync();
         }
 
-        public async Task<int> SaveAppConnectionAsync(AppConnect appConnect)
+        public async Task<int> SaveAsync(AppConnect appConnect)
         {
             if (appConnect.Id != 0)
             {
@@ -49,7 +49,7 @@ namespace ProjectTalon.Core.Data
             }
         }
             
-        public async Task<int> DeleteAppConnectionAsync(AppConnect appConnect)
+        public async Task<int> DeleteAsync(AppConnect appConnect)
         {
             return await database.DeleteAsync(appConnect);
         }
