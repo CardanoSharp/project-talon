@@ -9,10 +9,11 @@ using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ProjectTalon.App.Services
+namespace ProjectTalon.Core.Services
 {
     public interface IWalletService
     {
+
         Task AddWallet(string name, string recoveryPhrase, string spendingPassword);
     }
 

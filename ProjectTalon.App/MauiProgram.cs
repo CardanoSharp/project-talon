@@ -56,7 +56,9 @@ namespace ProjectTalon.App
             builder.Services.AddTransient<ITransactionHistoryViewModel, TransactionHistoryViewModel>();
             builder.Services.AddTransient<IWalletDashboardViewModel, WalletDashboardViewModel>();
             builder.Services.AddTransient<IWalletLayoutViewModel, WalletLayoutViewModel>();
-            builder.Services.AddTransient<Services.IWalletService, Services.WalletService>();
+            builder.Services.AddTransient<Core.Services.IWalletService, Core.Services.WalletService>();
+            builder.Services.AddTransient<Core.Services.ITransactionService, Core.Services.TransactionService>();
+            builder.Services.AddTransient<Core.Services.IAddressService, Core.Services.AddressService>();
 
             builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 

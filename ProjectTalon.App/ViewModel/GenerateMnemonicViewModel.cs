@@ -20,7 +20,7 @@ namespace ProjectTalon.App.ViewModel
     }
     public class GenerateMnemonicViewModel : IGenerateMnemonicViewModel
     {
-        private Services.IWalletService _walletService;
+        private Core.Services.IWalletService _walletService;
 
         private NavigationManager _uriHelper;
         private ValidationMessageStore? messageStore;
@@ -31,7 +31,7 @@ namespace ProjectTalon.App.ViewModel
         public bool DoneSeeingMnumonic { get; set; } = false;
         public string Mnemonic { get; set; }
 
-        public GenerateMnemonicViewModel(Services.IWalletService walletService, NavigationManager uriHelper)
+        public GenerateMnemonicViewModel(Core.Services.IWalletService walletService, NavigationManager uriHelper)
         {
             _walletService = walletService;
             _uriHelper = uriHelper;

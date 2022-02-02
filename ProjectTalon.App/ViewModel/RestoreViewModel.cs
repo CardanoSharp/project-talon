@@ -18,7 +18,7 @@ namespace ProjectTalon.App.ViewModel
 
     public class RestoreViewModel: IRestoreViewModel
     {
-        private Services.IWalletService _walletService;
+        private Core.Services.IWalletService _walletService;
         private NavigationManager _uriHelper;
         private ValidationMessageStore? messageStore;
 
@@ -26,7 +26,7 @@ namespace ProjectTalon.App.ViewModel
 
         public WalletCreationRequest WalletCreationForm { get; set; }
 
-        public RestoreViewModel(Services.IWalletService walletService, NavigationManager uriHelper)
+        public RestoreViewModel(Core.Services.IWalletService walletService, NavigationManager uriHelper)
         {
             _walletService = walletService;
             _uriHelper = uriHelper;

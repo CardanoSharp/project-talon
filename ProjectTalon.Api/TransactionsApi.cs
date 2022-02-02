@@ -7,6 +7,7 @@ using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
 using ProjectTalon.Core.Requests;
+using ProjectTalon.Core.Services;
 
 namespace ProjectTalon.Api;
 
@@ -40,6 +41,8 @@ public class TransactionsApi
 
     private static async Task<IResult> SubmitTransaction(
         ITransactionRequestDatabase transactionDatabase,
+        ITransactionService transactionService,
+        IAddressService addressService,
         [FromBody] TransactionSubmitRequest request,
         string appId)
     {
