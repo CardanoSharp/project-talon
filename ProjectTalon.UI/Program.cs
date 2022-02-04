@@ -8,6 +8,9 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ProjectTalon.Core.Data;
+using ProjectTalon.UI.ViewModels;
+using Splat;
 
 namespace ProjectTalon.UI
 {
@@ -29,6 +32,7 @@ namespace ProjectTalon.UI
         public static void RunApp(string[] args)
         {
             //Desktop App
+            Bootstrapper.Register(Locator.CurrentMutable, Locator.Current);
             AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToTrace()
@@ -59,6 +63,20 @@ namespace ProjectTalon.UI
             });
 
             app.Run();
+        }
+    }
+    public static class Bootstrapper
+    {
+        public static void Register(IMutableDependencyResolver services, IReadonlyDependencyResolver resolver)
+        {
+            services.Register<IWalletDatabase>(() => new WalletDatabase());
+            services.Register<IWalletKeyDatabase>(() => new WalletKeyDatabase());
+            services.Register<IAppConnectDatabase>(() => new AppConnectDatabase());
+            services.Register<ITransactionRequestDatabase>(() => new TransactionRequestDatabase());
+
+            services.RegisterLazySingleton<IMainWindowViewModel>(() => new MainWindowViewModel(
+                resolver.GetService<IWalletDatabase>()
+            ));
         }
     }
 }
