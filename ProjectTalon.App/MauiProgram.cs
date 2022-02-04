@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using Microsoft.Maui.LifecycleEvents;
+using ProjectTalon.App.Services;
 using ProjectTalon.App.ViewModel;
 using ProjectTalon.Core.Data;
+using System;
 
 namespace ProjectTalon.App
 {
@@ -37,9 +39,27 @@ namespace ProjectTalon.App
                     {
                         TalonApi.Stop();
                     });
+
+                    w.OnNativeMessage((app, args) =>
+                    {
+                        if (WindowExtensions.Hwnd == IntPtr.Zero)
+                        {
+                            WindowExtensions.Hwnd = args.Hwnd;
+                            WindowExtensions.SetIcon("Platforms/Windows/trayicon.ico");
+                        }
+                        app.ExtendsContentIntoTitleBar = false;
+                    });
                 });
 #endif
             });
+
+#if WINDOWS
+            builder.Services.AddSingleton<ITrayService, WinUI.TrayService>();
+            //builder.Services.AddSingleton<INotificationService, WinUI.NotificationService>();
+#elif MACCATALYST
+            builder.Services.AddSingleton<ITrayService, MacCatalyst.TrayService>();
+            //builder.Services.AddSingleton<INotificationService, MacCatalyst.NotificationService>();
+#endif
 
             builder.Services.AddBlazorWebView();
 

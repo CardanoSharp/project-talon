@@ -1,4 +1,5 @@
-﻿using Application = Microsoft.Maui.Controls.Application;
+﻿using Microsoft.Maui.Controls;
+using Application = Microsoft.Maui.Controls.Application;
 
 namespace ProjectTalon.App
 {
@@ -8,7 +9,16 @@ namespace ProjectTalon.App
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            //MainPage = new MainPage();
+            MainPage = new NavigationPage(new ContentPage
+            {
+                Content = new Label
+                {
+                    Text = "Hello Xamarin.Forms!",
+                    VerticalOptions = LayoutOptions.Center,
+                    HorizontalOptions = LayoutOptions.Center
+                }
+            });
         }
     }
 }

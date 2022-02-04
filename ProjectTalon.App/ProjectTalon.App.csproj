@@ -46,8 +46,10 @@
 		<!-- Required - WinUI does not yet have buildTransitive for everything -->
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.0.0.30" />
-	</ItemGroup>
-
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.0.1" />
+    <PackageReference Include="PInvoke.User32" Version="0.7.104" />
+  </ItemGroup>
+  
 	<PropertyGroup Condition="$(TargetFramework.Contains('-windows'))">
 		<OutputType>WinExe</OutputType>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -75,6 +77,38 @@
 
 	<ItemGroup>
 	  <Folder Include="Components\Index\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_MauiCompileToAdd Remove="Platforms\Windows\TrayService.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Platforms\Windows\MauiWinUIWindowExtensions.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\BalloonFlags.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\IconDataMembers.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\IconState.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\MouseEvent.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\NotifyCommand.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\NotifyIconData.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\Point.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WinApi.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WindowClass.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WindowInfo.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WindowMessages.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WindowMessageSink.cs" />
+	  <None Include="Platforms\Windows\NativeWindowing\WindowsTrayIcon.cs" />
+	  <None Include="Platforms\Windows\TrayService.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Platforms\Windows\TrayIcon.ico">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_MauiCompileToAdd Remove="Platforms\Windows\MauiWinUIWindowExtensions.cs" />
 	</ItemGroup>
 
 </Project>
