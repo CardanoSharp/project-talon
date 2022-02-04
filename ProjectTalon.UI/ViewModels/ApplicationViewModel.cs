@@ -20,6 +20,7 @@ namespace ProjectTalon.UI.ViewModels
             });
 
             ToggleCommand = MiniCommand.Create(() => { });
+
             FocusWindowCommand = MiniCommand.Create(() => {
                 if (_window is not null)
                 {
