@@ -33,12 +33,16 @@ namespace ProjectTalon.UI
         {
             //Desktop App
             Bootstrapper.Register(Locator.CurrentMutable, Locator.Current);
-            AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI()
+            BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
         }
+        
+        // Avalonia configuration, don't remove; also used by visual designer.
+        public static AppBuilder BuildAvaloniaApp()
+            => AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .LogToTrace()
+                .UseReactiveUI();
 
         public static void RunApi(string[] args)
         {
@@ -73,10 +77,9 @@ namespace ProjectTalon.UI
             services.Register<IWalletKeyDatabase>(() => new WalletKeyDatabase());
             services.Register<IAppConnectDatabase>(() => new AppConnectDatabase());
             services.Register<ITransactionRequestDatabase>(() => new TransactionRequestDatabase());
-
-            services.RegisterLazySingleton<IMainWindowViewModel>(() => new MainWindowViewModel(
-                resolver.GetService<IWalletDatabase>()
-            ));
+            // services.RegisterLazySingleton<IMainWindowViewModel>(() => new MainWindowViewModel(
+            //     resolver.GetService<IWalletDatabase>()
+            // ));
         }
     }
 }

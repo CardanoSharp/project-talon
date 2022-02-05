@@ -1,12 +1,18 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.ReactiveUI;
+using ProjectTalon.UI.ViewModels;
+using ReactiveUI;
 
 namespace ProjectTalon.UI.Views
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         private int paddingRight = 20;
         private int paddingBottom = 85;
@@ -18,6 +24,22 @@ namespace ProjectTalon.UI.Views
             this.AttachDevTools();
 #endif
 
+            this.WhenActivated(d => d(ViewModel!.ImportWalletDialog.RegisterHandler(ShowImportWalletDialogAsync)));
+            
+            SetupWindow();
+            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
+        }
+        private async Task ShowImportWalletDialogAsync(InteractionContext<AddWalletViewModel, ImportWalletViewModel?> interaction)
+        {
+            var dialog = new AddWalletWindow();
+            dialog.DataContext = interaction.Input;
+
+            var result = await dialog.ShowDialog<ImportWalletViewModel?>(this);
+            interaction.SetOutput(result);
+        }
+        
+        private void SetupWindow()
+        {
             Width = 350;
             Height = 600;
             CanResize = false;
@@ -30,8 +52,6 @@ namespace ProjectTalon.UI.Views
             var newY = screen.Bounds.Height - paddingBottom - 600;
 
             Position = new PixelPoint(newX, newY);
-
-            ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
         }
 
         private void InitializeComponent()

@@ -3,15 +3,39 @@
         xmlns:vm="using:ProjectTalon.UI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="600"
         x:Class="ProjectTalon.UI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ProjectTalon.UI">
+        Title="ProjectTalon.UI"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
 
+        <StackPanel Margin="40" VerticalAlignment="Center">
+            <StackPanel IsVisible="True">
+                <Button HorizontalAlignment="Center" Command="{Binding ImportWalletCommand}">Import Wallet</Button>
+                <Button HorizontalAlignment="Center">Create Wallet</Button>
+            </StackPanel>
+        
+            <StackPanel IsVisible="True">
+                <TextBlock TextAlignment="Center">Talon Connector</TextBlock>
+                <Button HorizontalAlignment="Center">View Connections</Button>
+            </StackPanel>
+        </StackPanel>
+    </Panel>
+    
 </Window>

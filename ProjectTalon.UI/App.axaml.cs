@@ -25,12 +25,10 @@ namespace ProjectTalon.UI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var vm = Locator.Current.GetService<IMainWindowViewModel>();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = vm
+                    DataContext = new MainWindowViewModel(),
                 };
-                ((ApplicationViewModel)DataContext).SetWindow(desktop.MainWindow);
             }
 
             base.OnFrameworkInitializationCompleted();

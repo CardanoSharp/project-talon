@@ -11,7 +11,8 @@
   </Application.DataTemplates>
 
   <Application.Styles>
-      <FluentTheme Mode="Light"/>
+      <FluentTheme Mode="Dark"/>
+      <StyleInclude Source="avares://ProjectTalon.UI/Icons.axaml"/>
   </Application.Styles>
 
 
