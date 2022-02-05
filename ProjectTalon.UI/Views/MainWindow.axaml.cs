@@ -25,6 +25,7 @@ namespace ProjectTalon.UI.Views
 #endif
 
             this.WhenActivated(d => d(ViewModel!.ImportWalletDialog.RegisterHandler(ShowImportWalletDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.GenerateWalletDialog.RegisterHandler(ShowGenerateWalletDialogAsync)));
             
             SetupWindow();
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
@@ -35,6 +36,14 @@ namespace ProjectTalon.UI.Views
             dialog.DataContext = interaction.Input;
 
             var result = await dialog.ShowDialog<ImportWalletViewModel?>(this);
+            interaction.SetOutput(result);
+        }
+        private async Task ShowGenerateWalletDialogAsync(InteractionContext<AddWalletViewModel, GenerateWalletViewModel?> interaction)
+        {
+            var dialog = new AddWalletWindow();
+            dialog.DataContext = interaction.Input;
+
+            var result = await dialog.ShowDialog<GenerateWalletViewModel?>(this);
             interaction.SetOutput(result);
         }
         

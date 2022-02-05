@@ -27,8 +27,10 @@
 
         <StackPanel Margin="40" VerticalAlignment="Center">
             <StackPanel IsVisible="True">
-                <Button HorizontalAlignment="Center" Command="{Binding ImportWalletCommand}">Import Wallet</Button>
-                <Button HorizontalAlignment="Center">Create Wallet</Button>
+                <Button HorizontalAlignment="Center" 
+                        Command="{Binding ImportWalletCommand}">Import Wallet</Button>
+                <Button HorizontalAlignment="Center"
+                        Command="{Binding GenerateWalletCommand}">Create Wallet</Button>
             </StackPanel>
         
             <StackPanel IsVisible="True">
