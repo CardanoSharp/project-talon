@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProjectTalon.UI.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProjectTalon.UI.Views.ImportWalletView">
+             x:Class="ProjectTalon.UI.Views.GenerateWalletView">
 
     <Design.DataContext>
-        <vm:ImportWalletViewModel/>
+        <vm:GenerateWalletViewModel/>
     </Design.DataContext>
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">

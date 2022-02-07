@@ -24,6 +24,7 @@
         </ExperimentalAcrylicBorder>
 
         <StackPanel Margin="40" VerticalAlignment="Center">
+            <Button Margin="40" HorizontalAlignment="Right" VerticalAlignment="Top" Command="{Binding ViewSettingsCommand}"><PathIcon Data="{StaticResource settings_regular}" /></Button>
             <StackPanel IsVisible="True">
                 <Button HorizontalAlignment="Center" 
                         Command="{Binding ImportWalletCommand}">Import Wallet</Button>
