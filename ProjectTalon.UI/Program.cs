@@ -22,15 +22,6 @@ namespace ProjectTalon.UI
         [STAThread]
         public static void Main(string[] args)
         {
-            Thread api = new Thread(new ThreadStart(() => RunApi(args)));
-            api.Start();
-
-            Thread app = new Thread(new ThreadStart(() => RunApp(args)));
-            app.Start();
-        }
-
-        public static void RunApp(string[] args)
-        {
             //Desktop App
             Bootstrapper.Register(Locator.CurrentMutable, Locator.Current);
             BuildAvaloniaApp()
@@ -43,31 +34,6 @@ namespace ProjectTalon.UI
                 .UsePlatformDetect()
                 .LogToTrace()
                 .UseReactiveUI();
-
-        public static void RunApi(string[] args)
-        {
-            //Api
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.MapGet("/hello", () =>
-            {
-                return Results.Ok("Hello, World!");
-            });
-
-            app.Run();
-        }
     }
     public static class Bootstrapper
     {
