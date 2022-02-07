@@ -2,11 +2,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:ProjectTalon.UI.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ProjectTalon.UI.Views.AddWalletWindow"
         WindowStartupLocation="CenterScreen"
         Title="Add Wallet"
         Icon="/Assets/avalonia-logo.ico">
+
+    <Design.DataContext>
+        <vm:AddWalletViewModel/>
+    </Design.DataContext>
+    
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
             <ExperimentalAcrylicBorder.Material>
@@ -18,8 +24,14 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
-        <Panel Margin="40">
-
-        </Panel>
+        <StackPanel Margin="40" VerticalAlignment="Center">
+            <StackPanel IsVisible="{Binding ShowImport}">
+                <TextBlock TextAlignment="Center">Import</TextBlock>
+            </StackPanel>
+        
+            <StackPanel IsVisible="{Binding ShowGenerate}">
+                <TextBlock TextAlignment="Center">Generate</TextBlock>
+            </StackPanel>
+        </StackPanel>
     </Panel>
 </Window>

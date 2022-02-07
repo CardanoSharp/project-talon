@@ -33,6 +33,8 @@ namespace ProjectTalon.UI.Views
         }
         private async Task ShowImportWalletDialogAsync(InteractionContext<AddWalletViewModel, ImportWalletViewModel?> interaction)
         {
+            interaction.Input.WalletCreation = WalletCreation.Import;
+            
             var dialog = new AddWalletWindow();
             dialog.DataContext = interaction.Input;
 
@@ -41,6 +43,8 @@ namespace ProjectTalon.UI.Views
         }
         private async Task ShowGenerateWalletDialogAsync(InteractionContext<AddWalletViewModel, GenerateWalletViewModel?> interaction)
         {
+            interaction.Input.WalletCreation = WalletCreation.Generate;
+            
             var dialog = new AddWalletWindow();
             dialog.DataContext = interaction.Input;
 
