@@ -2,5 +2,8 @@
 
 public class SettingsViewModel: ViewModelBase
 {
-    
+    public SettingsViewModel()
+    {
+        
+    }
 }

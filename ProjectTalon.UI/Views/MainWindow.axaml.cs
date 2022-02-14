@@ -7,8 +7,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.ReactiveUI;
+using ProjectTalon.Core.Common;
+using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 using ProjectTalon.UI.ViewModels;
 using ReactiveUI;
+using Splat;
 
 namespace ProjectTalon.UI.Views
 {
@@ -31,7 +35,33 @@ namespace ProjectTalon.UI.Views
             
             SetupWindow();
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
+
+            Task.Run(async () => await InitializeSettings());
         }
+
+        private async Task InitializeSettings()
+        {
+            var settingsDatabase = Locator.Current.GetService<ISettingsDatabase>();
+
+            //CHECK NETWORK SETTING
+            var networkSettings = await settingsDatabase.GetByKeyAsync(SettingKeys.NETWORK);
+            if (networkSettings is null)
+                await settingsDatabase.SaveAsync(new Settings
+                {
+                    Key = SettingKeys.NETWORK,
+                    Value = NetworkOptions.TESTNET
+                });
+            
+            //CHECK API SETTING
+            var apiSettings = await settingsDatabase.GetByKeyAsync(SettingKeys.API_ENABLED);
+            if (apiSettings is null)
+                await settingsDatabase.SaveAsync(new Settings
+                {
+                    Key = SettingKeys.API_ENABLED,
+                    Value = false.ToString()
+                });
+        }
+
         private async Task ShowImportWalletDialogAsync(InteractionContext<AddWalletViewModel, ImportWalletViewModel?> interaction)
         {
             interaction.Input.WalletCreation = WalletCreation.Import;
@@ -66,6 +96,8 @@ namespace ProjectTalon.UI.Views
         private async Task ShowSettingsDialogAsync(InteractionContext<SettingsViewModel, ManageSettingsViewModel?> interaction)
         {
             var dialog = new SettingsWindow();
+            dialog.Width = 400;
+            dialog.Height = 200;
             dialog.DataContext = interaction.Input;
 
             var result = await dialog.ShowDialog<ManageSettingsViewModel?>(this);

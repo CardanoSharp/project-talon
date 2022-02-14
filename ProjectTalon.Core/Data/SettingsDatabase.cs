@@ -4,8 +4,8 @@ namespace ProjectTalon.Core.Data;
 public interface ISettingsDatabase
 {
     Task<List<Settings>> ListAsync();
-    Task<Settings> GetAsync(int id);
-    Task<Settings> GetByKeyAsync(string key);
+    Task<Settings?> GetAsync(int id);
+    Task<Settings?> GetByKeyAsync(string key);
     Task<int> SaveAsync(Settings setting);
 }
 
@@ -21,14 +21,14 @@ public class SettingsDatabase: BaseDatabase, ISettingsDatabase
         return await database.Table<Settings>().ToListAsync();
     }
 
-    public async Task<Settings> GetAsync(int id)
+    public async Task<Settings?> GetAsync(int id)
     {
         return await database.Table<Settings>()
             .Where(i => i.Id == id)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Settings> GetByKeyAsync(string key)
+    public async Task<Settings?> GetByKeyAsync(string key)
     {
         return await database.Table<Settings>()
             .Where(i => i.Key.Equals(key))

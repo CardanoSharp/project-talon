@@ -3,9 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:ProjectTalon.UI.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d"
              x:Class="ProjectTalon.UI.Views.ManageSettingsView">
-
     <Design.DataContext>
         <vm:ManageSettingsViewModel/>
     </Design.DataContext>
@@ -21,8 +20,19 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
-        <StackPanel Margin="40" VerticalAlignment="Center">
+        <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*,*" Margin="5">
+            <Label HorizontalAlignment="Left">Network</Label>
+            <ComboBox Grid.Column="1" SelectedIndex="{Binding Form.NetworkValue}" HorizontalAlignment="Left">
+                <ComboBoxItem>Testnet</ComboBoxItem>
+                <ComboBoxItem>Mainnet</ComboBoxItem>
+            </ComboBox>
             
-        </StackPanel>
+            <Label HorizontalAlignment="Left" Grid.Row="1">Turn on API</Label>
+            <ToggleSwitch Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" IsChecked="{Binding Form.ApiEnabledValue}" />
+            
+            <Button Grid.Row="2" Command="{Binding SaveSettings}">Save</Button>
+            
+            <Label Grid.Row="3" Grid.ColumnSpan="2" Foreground="Green" FontWeight="Bold" IsVisible="{Binding ShowSaveSuccess}">Your settings have been updated!</Label>
+        </Grid>
     </Panel>
 </UserControl>
