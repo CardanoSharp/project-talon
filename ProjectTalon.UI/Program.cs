@@ -43,6 +43,7 @@ namespace ProjectTalon.UI
             services.Register<IWalletKeyDatabase>(() => new WalletKeyDatabase());
             services.Register<IAppConnectDatabase>(() => new AppConnectDatabase());
             services.Register<ITransactionRequestDatabase>(() => new TransactionRequestDatabase());
+            services.Register<ISettingsDatabase>(() => new SettingsDatabase());
             // services.RegisterLazySingleton<IMainWindowViewModel>(() => new MainWindowViewModel(
             //     resolver.GetService<IWalletDatabase>()
             // ));
