@@ -62,11 +62,9 @@ namespace ProjectTalon.UI.Views
                 });
         }
 
-        private async Task ShowImportWalletDialogAsync(InteractionContext<AddWalletViewModel, ImportWalletViewModel?> interaction)
+        private async Task ShowImportWalletDialogAsync(InteractionContext<ImportWalletViewModel, ImportWalletViewModel?> interaction)
         {
-            interaction.Input.WalletCreation = WalletCreation.Import;
-            
-            var dialog = new AddWalletWindow();
+            var dialog = new ImportWalletView();
             dialog.DataContext = interaction.Input;
 
             var result = await dialog.ShowDialog<ImportWalletViewModel?>(this);

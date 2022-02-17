@@ -19,23 +19,22 @@ namespace ProjectTalon.UI.ViewModels
         public ICommand ImportWalletCommand { get; }
         public ICommand ViewConnectionsCommand { get; }
         public ICommand ViewSettingsCommand { get; }
-        public Interaction<AddWalletViewModel, ImportWalletViewModel?> ImportWalletDialog { get; }
+        public Interaction<ImportWalletViewModel, ImportWalletViewModel?> ImportWalletDialog { get; }
         public Interaction<AddWalletViewModel, GenerateWalletViewModel?> GenerateWalletDialog { get; }
         public Interaction<ConnectionsViewModel, ViewConnectionsViewModel?> ViewConnectionsDialog { get; }
         public Interaction<SettingsViewModel, ManageSettingsViewModel?> ViewSettingsDialog { get; }
         
         public MainWindowViewModel()
         {
-            ImportWalletDialog = new Interaction<AddWalletViewModel, ImportWalletViewModel?>();
+            ImportWalletDialog = new Interaction<ImportWalletViewModel, ImportWalletViewModel?>();
             GenerateWalletDialog = new Interaction<AddWalletViewModel, GenerateWalletViewModel?>();
             ViewConnectionsDialog = new Interaction<ConnectionsViewModel, ViewConnectionsViewModel?>();
             ViewSettingsDialog = new Interaction<SettingsViewModel, ManageSettingsViewModel?>();
             
             ImportWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var vm = new AddWalletViewModel();
 
-                var result = await ImportWalletDialog.Handle(vm);
+                var result = await ImportWalletDialog.Handle(new ImportWalletViewModel());
 
                 if (result != null)
                 {

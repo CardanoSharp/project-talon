@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 
 namespace ProjectTalon.UI.Views;
 
-public partial class ImportWalletView : UserControl
+public partial class ImportWalletView :  Window
 {
     public ImportWalletView()
     {

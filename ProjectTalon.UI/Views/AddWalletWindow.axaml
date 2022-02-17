@@ -25,10 +25,6 @@
         </ExperimentalAcrylicBorder>
 
         <StackPanel Margin="40" VerticalAlignment="Center">
-            <StackPanel IsVisible="{Binding ShowImport}">
-                <TextBlock TextAlignment="Center">Import</TextBlock>
-            </StackPanel>
-        
             <StackPanel IsVisible="{Binding ShowGenerate}">
                 <TextBlock TextAlignment="Center">Generate</TextBlock>
             </StackPanel>

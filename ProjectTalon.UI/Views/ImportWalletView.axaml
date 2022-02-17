@@ -19,6 +19,30 @@
                     MaterialOpacity="0.65" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
+        
+        <StackPanel Margin="40" VerticalAlignment="Center">
+            <StackPanel IsVisible="{Binding ShowImport}">
+                <TextBlock TextAlignment="Center">Import Wallet From Phrase</TextBlock>
+            </StackPanel>
+            <StackPanel>
+                <TextBox Text="Phrase"
+                         VerticalAlignment="Center" 
+                         HorizontalAlignment="Center"
+                         Width="60" 
+                         Name="Username"/>
+            
+                
+                <Button VerticalAlignment="Center" 
+                        HorizontalAlignment="Center" 
+                        Width="100"
+                        Command="{Binding ImportWalletFromPhrase}"
+                >    
+                </Button>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding ShowHardware}">
+                <TextBlock TextAlignment="Center">Import Hardware Wallet</TextBlock>
+            </StackPanel>
+        </StackPanel>
 
         <Panel Margin="40">
 
