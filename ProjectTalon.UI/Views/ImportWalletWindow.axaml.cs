@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace ProjectTalon.UI.Views;
 
-public partial class AddWalletWindow : Window
+public partial class ImportWalletWindow : Window
 {
-    public AddWalletWindow()
+    public ImportWalletWindow()
     {
         InitializeComponent();
 #if DEBUG
