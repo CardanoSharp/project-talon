@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
              x:Class="ProjectTalon.UI.Views.AddWalletWizardViews.EnterMnemonicView"
              xmlns:vm="using:ProjectTalon.UI.ViewModels.AddWalletWizardViewModels">
 
@@ -307,13 +307,13 @@
                 </Border>
             </Grid>
             
-            <!-- <Border Classes="Card"  -->
-            <!--         Background="#FFD3A8"> -->
-            <!--     <StackPanel> -->
-            <!--         <Label>Attention</Label> -->
-            <!--         <Label>Make sure you write down the 24 words on a piece of paper or something that is not online.</Label> -->
-            <!--     </StackPanel> -->
-            <!-- </Border> -->
+            <Border Classes="Card"
+                    Background="#FFD3A8">
+                <StackPanel>
+                    <Label>Instructions</Label>
+                    <Label>Please enter your recovery phrase in the correct order to continue.</Label>
+                </StackPanel>
+            </Border>
             
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -322,8 +322,9 @@
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" 
                         Command="{Binding Previous}"
-                        Margin="10">Previous</Button>
+                        Margin="10">Back</Button>
                 <Button Grid.Column="1" 
+                        IsEnabled="{Binding Match}"
                         Command="{Binding Next}"
                         Margin="10">Next</Button>
             </Grid>

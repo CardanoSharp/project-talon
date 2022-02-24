@@ -9,7 +9,9 @@ using Avalonia.Controls;
 using Avalonia;
 using ReactiveUI;
 using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Services;
 using ProjectTalon.UI.Views;
+using Splat;
 
 namespace ProjectTalon.UI.ViewModels
 {
@@ -45,7 +47,7 @@ namespace ProjectTalon.UI.ViewModels
             
             CreateWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var vm = new CreateWalletViewModel();
+                var vm = new CreateWalletViewModel(Locator.Current.GetService<IWalletService>());
 
                 var result = await CreateWalletDialog.Handle(vm);
 

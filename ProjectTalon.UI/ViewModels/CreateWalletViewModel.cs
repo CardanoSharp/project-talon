@@ -12,6 +12,7 @@ using ProjectTalon.UI.ViewModels.AddWalletWizardViewModels;
 using ProjectTalon.UI.Views;
 using ProjectTalon.UI.Views.AddWalletWizardViews;
 using ReactiveUI;
+using IWalletService = ProjectTalon.Core.Services.IWalletService;
 
 namespace ProjectTalon.UI.ViewModels;
 
@@ -24,13 +25,15 @@ public class CreateWalletViewModel: ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _activeItem, value);
     }
 
+    private IWalletService _walletService { get; set; }
     private DisclaimerViewModel DisclaimerStep { get; set; }
     private ShowMnemonicViewModel ShowMnemonicStep { get; set; }
     private EnterMnemonicViewModel EnterMnemonicStep { get; set; }
     private NameAndSecureViewModel NameAndSecureStep { get; set; }
     
-    public CreateWalletViewModel()
+    public CreateWalletViewModel(IWalletService walletService)
     {
+        _walletService = walletService;
         SetActiveView(CreateWizardSteps.Disclaimer);
     }
     
@@ -82,6 +85,7 @@ public class CreateWalletViewModel: ViewModelBase
     {
         EnterMnemonicStep = new EnterMnemonicViewModel()
         {
+            CurrentMnemonic = Mnemonic.Words.Split(' ').ToList(),
             Next = ReactiveCommand.CreateFromTask(EnterMnemonicNext),
             Previous = ReactiveCommand.CreateFromTask(EnterMnemonicPrevious)
         };
@@ -109,6 +113,8 @@ public class CreateWalletViewModel: ViewModelBase
     public ICommand ExitWizard { get; set; }
     private async Task NameAndSecureNext(CancellationToken arg)
     {
+        await _walletService.AddWallet(NameAndSecureStep.Name, Mnemonic.Words, NameAndSecureStep.ConfirmPassword);
+        
         //close parent window
         ExitWizard.Execute(null);
     }
@@ -142,8 +148,6 @@ public class CreateWalletViewModel: ViewModelBase
 
     private async Task DisclaimerNext(CancellationToken arg)
     {
-        var mnemonic = new MnemonicService().Generate(24);
-        
         SetActiveView(CreateWizardSteps.ShowMnemonic);
     }
 }

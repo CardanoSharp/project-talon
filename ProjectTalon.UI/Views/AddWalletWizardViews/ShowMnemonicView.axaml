@@ -130,7 +130,7 @@
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" 
                         Command="{Binding Previous}"
-                        Margin="10">Previous</Button>
+                        Margin="10">Back</Button>
                 <Button Grid.Column="1" 
                         Command="{Binding Next}"
                         Margin="10">Next</Button>
