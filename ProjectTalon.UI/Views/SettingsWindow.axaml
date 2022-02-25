@@ -7,24 +7,13 @@
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="200"
         x:Class="ProjectTalon.UI.Views.SettingsWindow"
         WindowStartupLocation="CenterScreen"
-        Icon="/Assets/avalonia-logo.ico"
-        TransparencyLevelHint="AcrylicBlur"
-        Background="Transparent">
+        Icon="/Assets/avalonia-logo.ico">
 
     <Design.DataContext>
         <vm:SettingsViewModel/>
     </Design.DataContext>
     
     <Panel>
-        <ExperimentalAcrylicBorder IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    BackgroundSource="Digger"
-                    TintColor="Black"
-                    TintOpacity="1"
-                    MaterialOpacity="0.65" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
 
         <StackPanel Margin="20">
             <Label FontWeight="Bold" FontSize="24">Settings</Label>

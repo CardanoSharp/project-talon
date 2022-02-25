@@ -6,23 +6,12 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ProjectTalon.UI.Views.ConnectionsWindow"
         WindowStartupLocation="CenterScreen"
-        Title="Connections"
         Icon="/Assets/avalonia-logo.ico">
 
     <Design.DataContext>
         <vm:ConnectionsViewModel/>
     </Design.DataContext>
     <Panel>
-        <ExperimentalAcrylicBorder IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    BackgroundSource="Digger"
-                    TintColor="Black"
-                    TintOpacity="1"
-                    MaterialOpacity="0.65" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
-
         <Panel Margin="40">
 
         </Panel>

@@ -29,7 +29,7 @@ namespace ProjectTalon.UI.Views
 #endif
 
             this.WhenActivated(d => d(ViewModel!.ImportWalletDialog.RegisterHandler(ShowImportWalletDialogAsync)));
-            this.WhenActivated(d => d(ViewModel!.GenerateWalletDialog.RegisterHandler(ShowGenerateWalletDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.CreateWalletDialog.RegisterHandler(ShowCreateWalletDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewConnectionsDialog.RegisterHandler(ShowConnectionsDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewSettingsDialog.RegisterHandler(ShowSettingsDialogAsync)));
             
@@ -62,25 +62,25 @@ namespace ProjectTalon.UI.Views
                 });
         }
 
-        private async Task ShowImportWalletDialogAsync(InteractionContext<AddWalletViewModel, ImportWalletViewModel?> interaction)
+        private async Task ShowImportWalletDialogAsync(InteractionContext<ImportWalletViewModel, ImportWalletWizardViewModel?> interaction)
         {
-            interaction.Input.WalletCreation = WalletCreation.Import;
-            
-            var dialog = new AddWalletWindow();
-            dialog.DataContext = interaction.Input;
+            var dialog = new ImportWalletWindow
+            {
+                DataContext = interaction.Input
+            };
 
-            var result = await dialog.ShowDialog<ImportWalletViewModel?>(this);
+            var result = await dialog.ShowDialog<ImportWalletWizardViewModel?>(this);
             interaction.SetOutput(result);
         }
         
-        private async Task ShowGenerateWalletDialogAsync(InteractionContext<AddWalletViewModel, GenerateWalletViewModel?> interaction)
+        private async Task ShowCreateWalletDialogAsync(InteractionContext<CreateWalletViewModel, CreateWalletViewModel?> interaction)
         {
-            interaction.Input.WalletCreation = WalletCreation.Generate;
-            
-            var dialog = new AddWalletWindow();
-            dialog.DataContext = interaction.Input;
+            var dialog = new CreateWalletWindow
+            {
+                DataContext = interaction.Input
+            };
 
-            var result = await dialog.ShowDialog<GenerateWalletViewModel?>(this);
+            var result = await dialog.ShowDialog<CreateWalletViewModel?>(this);
             interaction.SetOutput(result);
         }
         

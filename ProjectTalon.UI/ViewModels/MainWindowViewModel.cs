@@ -9,31 +9,33 @@ using Avalonia.Controls;
 using Avalonia;
 using ReactiveUI;
 using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Services;
 using ProjectTalon.UI.Views;
+using Splat;
 
 namespace ProjectTalon.UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public ICommand GenerateWalletCommand { get; }
+        public ICommand CreateWalletCommand { get; }
         public ICommand ImportWalletCommand { get; }
         public ICommand ViewConnectionsCommand { get; }
         public ICommand ViewSettingsCommand { get; }
-        public Interaction<AddWalletViewModel, ImportWalletViewModel?> ImportWalletDialog { get; }
-        public Interaction<AddWalletViewModel, GenerateWalletViewModel?> GenerateWalletDialog { get; }
+        public Interaction<ImportWalletViewModel, ImportWalletWizardViewModel?> ImportWalletDialog { get; }
+        public Interaction<CreateWalletViewModel, CreateWalletViewModel?> CreateWalletDialog { get; }
         public Interaction<ConnectionsViewModel, ViewConnectionsViewModel?> ViewConnectionsDialog { get; }
         public Interaction<SettingsViewModel, ManageSettingsViewModel?> ViewSettingsDialog { get; }
         
         public MainWindowViewModel()
         {
-            ImportWalletDialog = new Interaction<AddWalletViewModel, ImportWalletViewModel?>();
-            GenerateWalletDialog = new Interaction<AddWalletViewModel, GenerateWalletViewModel?>();
+            ImportWalletDialog = new Interaction<ImportWalletViewModel, ImportWalletWizardViewModel?>();
+            CreateWalletDialog = new Interaction<CreateWalletViewModel, CreateWalletViewModel?>();
             ViewConnectionsDialog = new Interaction<ConnectionsViewModel, ViewConnectionsViewModel?>();
             ViewSettingsDialog = new Interaction<SettingsViewModel, ManageSettingsViewModel?>();
             
             ImportWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var vm = new AddWalletViewModel();
+                var vm = new ImportWalletViewModel();
 
                 var result = await ImportWalletDialog.Handle(vm);
 
@@ -43,11 +45,11 @@ namespace ProjectTalon.UI.ViewModels
                 }
             });
             
-            GenerateWalletCommand = ReactiveCommand.CreateFromTask(async () =>
+            CreateWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var vm = new AddWalletViewModel();
+                var vm = new CreateWalletViewModel(Locator.Current.GetService<IWalletService>());
 
-                var result = await GenerateWalletDialog.Handle(vm);
+                var result = await CreateWalletDialog.Handle(vm);
 
                 if (result != null)
                 {
