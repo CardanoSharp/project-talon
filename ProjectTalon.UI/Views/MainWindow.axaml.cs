@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.ReactiveUI;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
@@ -20,6 +21,8 @@ namespace ProjectTalon.UI.Views
     {
         private int paddingRight = 20;
         private int paddingBottom = 85;
+
+        private Label addressLabel => this.FindControl<Label>("lblAddress");
 
         public MainWindow()
         {

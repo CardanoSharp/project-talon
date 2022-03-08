@@ -50,7 +50,7 @@
         
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
             
-            <StackPanel IsVisible="True">
+            <StackPanel IsVisible="{Binding !HasWallet}">
                 <Label HorizontalAlignment="Center"
                        FontSize="26"
                        FontWeight="Bold">Welcome to Talon</Label>
@@ -67,8 +67,21 @@
                         Command="{Binding CreateWalletCommand}">Create Wallet</Button>
             </StackPanel>
         
-            <StackPanel IsVisible="False">
-                <TextBlock TextAlignment="Center">Talon Connector</TextBlock>
+            <StackPanel IsVisible="{Binding HasWallet}">
+                <Label HorizontalAlignment="Center"
+                       FontSize="26"
+                       FontWeight="Bold">Talon Connector</Label>
+                <Label Content="{Binding Address1}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
+                <Label Content="{Binding Address2}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
+                <Label Content="{Binding Address3}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
+                <Label Content="{Binding Address4}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
+                
+                <Button HorizontalAlignment="Center" Margin="20"
+                        Command="{Binding CopyAddress}">Copy To Clipboard</Button>
+                
+                <Button HorizontalAlignment="Center"
+                        Command="{Binding ViewWallet}">Wallet Balance</Button>
+                
                 <Button HorizontalAlignment="Center"
                         Command="{Binding ViewConnectionsCommand}">View Connections</Button>
             </StackPanel>

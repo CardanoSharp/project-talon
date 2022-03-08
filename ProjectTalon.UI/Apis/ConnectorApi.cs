@@ -78,7 +78,7 @@ public static class ConnectorApi
     {
         try
         {
-            var wallets = await walletdatabase.GetWalletsAsync();
+            var wallets = await walletdatabase.ListAsync();
             var wallet = await keyDatabase.GetWalletKeysAsync(id);
             var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
 

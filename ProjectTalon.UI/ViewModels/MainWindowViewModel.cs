@@ -1,22 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows;
+using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using JetBrains.Annotations;
-using Avalonia.ReactiveUI;
-using Avalonia.Controls;
 using Avalonia;
+using CardanoSharp.Wallet;
+using CardanoSharp.Wallet.Enums;
+using CardanoSharp.Wallet.Extensions.Models;
+using CardanoSharp.Wallet.Models.Keys;
+using DynamicData;
+using Microsoft.AspNetCore.Components.Web;
+using ProjectTalon.Core.Common;
 using ReactiveUI;
 using ProjectTalon.Core.Data;
-using ProjectTalon.Core.Services;
-using ProjectTalon.UI.Views;
 using Splat;
 
 namespace ProjectTalon.UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private readonly IWalletDatabase _walletDatabase;
+        private readonly IWalletKeyDatabase _walletKeyDatabase;
+        private readonly ISettingsDatabase _settingsDatabase;
         public ICommand CreateWalletCommand { get; }
         public ICommand ImportWalletCommand { get; }
         public ICommand ViewConnectionsCommand { get; }
@@ -25,9 +34,78 @@ namespace ProjectTalon.UI.ViewModels
         public Interaction<CreateWalletViewModel, CreateWalletViewModel?> CreateWalletDialog { get; }
         public Interaction<ConnectionsViewModel, ViewConnectionsViewModel?> ViewConnectionsDialog { get; }
         public Interaction<SettingsViewModel, ManageSettingsViewModel?> ViewSettingsDialog { get; }
+
+        private int? _walletId;
+        public int? WalletId
+        {
+            get => _walletId;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _walletId, value);
+                HasWallet = _walletId.HasValue;
+            }
+        }
+
+        private bool _hasWallet;
+        public bool HasWallet
+        {
+            get => _hasWallet;
+            set => this.RaiseAndSetIfChanged(ref _hasWallet, value);
+        }
+
+        private string _address;
+        public string Address
+        {
+            get => _address;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _address, value);
+
+                var addressSections = _address.Length / 4;
+                Address1 = _address.Substring(0, addressSections);
+                Address2 = _address.Substring(addressSections, addressSections);
+                Address3 = _address.Substring(addressSections * 2, addressSections);
+                Address4 = _address.Substring(addressSections * 3, addressSections);
+            }
+        }
+
+        private string _address1;
+        public string Address1
+        {
+            get => _address1;
+            set => this.RaiseAndSetIfChanged(ref _address1, value);
+        }
+
+        private string _address2;
+        public string Address2
+        {
+            get => _address2;
+            set => this.RaiseAndSetIfChanged(ref _address2, value);
+        }
+
+        private string _address3;
+        public string Address3
+        {
+            get => _address3;
+            set => this.RaiseAndSetIfChanged(ref _address3, value);
+        }
+
+        private string _address4;
+        public string Address4
+        {
+            get => _address4;
+            set => this.RaiseAndSetIfChanged(ref _address4, value);
+        }
         
         public MainWindowViewModel()
         {
+            _walletDatabase = Locator.Current.GetService<IWalletDatabase>();
+            _walletKeyDatabase = Locator.Current.GetService<IWalletKeyDatabase>();
+            _settingsDatabase = Locator.Current.GetService<ISettingsDatabase>();
+
+            this.WhenAnyValue(x => x.WalletId)
+                .Subscribe( x => Task.Run(SetupWalletDashboard));
+            
             ImportWalletDialog = new Interaction<ImportWalletViewModel, ImportWalletWizardViewModel?>();
             CreateWalletDialog = new Interaction<CreateWalletViewModel, CreateWalletViewModel?>();
             ViewConnectionsDialog = new Interaction<ConnectionsViewModel, ViewConnectionsViewModel?>();
@@ -37,24 +115,16 @@ namespace ProjectTalon.UI.ViewModels
             {
                 var vm = new ImportWalletViewModel();
 
-                var result = await ImportWalletDialog.Handle(vm);
-
-                if (result != null)
-                {
-                    //do something
-                }
+                await ImportWalletDialog.Handle(vm);
+                await WalletExists();
             });
             
             CreateWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var vm = new CreateWalletViewModel(Locator.Current.GetService<IWalletService>());
+                var vm = new CreateWalletViewModel(Locator.Current.GetService<Core.Services.IWalletService>());
 
-                var result = await CreateWalletDialog.Handle(vm);
-
-                if (result != null)
-                {
-                    //do something
-                }
+                await CreateWalletDialog.Handle(vm);
+                await WalletExists();
             });
             
             ViewConnectionsCommand = ReactiveCommand.CreateFromTask(async () =>
@@ -73,12 +143,65 @@ namespace ProjectTalon.UI.ViewModels
             {
                 var vm = new SettingsViewModel();
 
-                var result = await ViewSettingsDialog.Handle(vm);
+                await ViewSettingsDialog.Handle(vm);
+            });
 
-                if (result != null)
-                {
-                    //do something
-                }
+            Task.Run(async () => await WalletExists());
+        }
+
+        private async Task SetupWalletDashboard()
+        {
+            Address = await GetWalletAddress();
+        }
+        
+        private async Task<string> GetWalletAddress()
+        {
+            var wallet = await _walletKeyDatabase.GetWalletKeysAsync(1);
+            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+            if (publicKey is null)
+                throw new Exception("Wallet not found");
+            var payment = publicKey
+                .Derive(RoleType.ExternalChain)
+                .Derive(0);
+
+            var stake = publicKey
+                .Derive(RoleType.Staking)
+                .Derive(0);
+
+            var address = new AddressService()
+                .GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet);
+
+            return address.ToString();
+        }
+
+        private async Task<bool> WalletExists()
+        {
+            var wallet = await _walletDatabase.GetFirstAsync();
+            
+            WalletId = wallet?.Id;
+
+            return wallet is not null;
+        }
+
+        public void CopyAddress()
+        {
+            Application.Current.Clipboard.SetTextAsync(Address);
+        }
+
+        public async void ViewWallet()
+        {
+            var settings = await _settingsDatabase.GetByKeyAsync(SettingKeys.NETWORK);
+            if (settings is null) return;
+
+            var network = settings.Value == NetworkOptions.TESTNET
+                ? "testnet"
+                : "";
+            var url = $"https://{network}.cardanoscan.io/address/{Address}";
+            
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
             });
         }
     }
