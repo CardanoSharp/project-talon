@@ -57,7 +57,12 @@ public static class ConnectorApi
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
+<<<<<<< Updated upstream
             StatusCode = appConnect.ConnectionStatus
+=======
+            StatusCode = appConnect.ConnectionStatus,
+            JwtToken = jwtToken,
+>>>>>>> Stashed changes
         });
     }
 
