@@ -30,14 +30,13 @@ public static class ConnectorApi
     public static void AddEndpoints(WebApplication app)
     {
         app.MapPost("/connect", Connect);
-        
-        app.MapGet("/connect/{appId}/status", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => 
-        CheckConnectionStatus);
+
+        app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
     }
 
     private static async Task<IResult> Connect(
         [FromBody] ConnectRequest request,
-        IAppConnectDatabase appConnectDatabase, IConfiguration configuration)
+        IAppConnectDatabase appConnectDatabase)
     {
         try
         {
@@ -48,27 +47,10 @@ public static class ConnectorApi
                 AppId = appId,
                 Name = request.Name,
                 ConnectionStatus = (int) ConnectionStatus.Pending
-            });
-            
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, request.Name),
-                new Claim(ClaimTypes.SerialNumber, appId)
-            };
-
-            var jwtToken = new JwtSecurityToken(
-                issuer: configuration["Jwt:Issuer"],
-                audience: configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(30),
-                notBefore: DateTime.UtcNow,
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
-                    , SecurityAlgorithms.HmacSha256));
+            }); ;
             return Results.Ok(new
             {
                 AppId = appId,
-                token = jwtToken
             });
         }
         catch (Exception e)
@@ -77,17 +59,34 @@ public static class ConnectorApi
         }
     }
 
-    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase)
+    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase, IConfiguration configuration)
     {
         var appConnect = await appConnectDatabase.GetByAppIdAsync(appId);
 
         if (appConnect is null)
             return Results.NotFound();
+        
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, appConnect.Name),
+            new Claim(ClaimTypes.SerialNumber, appConnect.AppId)
+        };
+
+        var jwtToken = new JwtSecurityToken(
+            issuer: configuration["Jwt:Issuer"],
+            audience: configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30),
+            notBefore: DateTime.UtcNow,
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                , SecurityAlgorithms.HmacSha256));
 
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
-            StatusCode = appConnect.ConnectionStatus
+            StatusCode = appConnect.ConnectionStatus,
+            jwtToken
         });
     }
 
