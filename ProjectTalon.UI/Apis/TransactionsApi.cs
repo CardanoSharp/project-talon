@@ -3,6 +3,8 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Koios.Sdk.Contracts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,11 +21,11 @@ public class TransactionsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapPost("/transactions/info", GetInfo);
-        app.MapPost("/transactions/utxo", GetUtxo);
-        app.MapPost("/transactions/metadata", GetMetadata);
-        app.MapPost("/transaction/submit/{appId}", SubmitTransaction);
-        app.MapPost("/transaction/status/{appId}/{referenceId}", StatusTransaction);
+        app.MapPost("/transactions/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInfo);
+        app.MapPost("/transactions/utxo", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetUtxo);
+        app.MapPost("/transactions/metadata", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetMetadata);
+        app.MapPost("/transaction/submit/{appId}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => SubmitTransaction);
+        app.MapPost("/transaction/status/{appId}/{referenceId}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => StatusTransaction);
     }
 
     private static async Task<IResult> StatusTransaction(

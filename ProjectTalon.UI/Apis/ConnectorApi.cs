@@ -1,5 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Blockfrost.Api.Services;
@@ -7,9 +10,14 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
@@ -22,12 +30,14 @@ public static class ConnectorApi
     public static void AddEndpoints(WebApplication app)
     {
         app.MapPost("/connect", Connect);
-        app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
+        
+        app.MapGet("/connect/{appId}/status", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => 
+        CheckConnectionStatus);
     }
 
     private static async Task<IResult> Connect(
         [FromBody] ConnectRequest request,
-        IAppConnectDatabase appConnectDatabase)
+        IAppConnectDatabase appConnectDatabase, IConfiguration configuration)
     {
         try
         {
@@ -39,8 +49,27 @@ public static class ConnectorApi
                 Name = request.Name,
                 ConnectionStatus = (int) ConnectionStatus.Pending
             });
+            
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, request.Name),
+                new Claim(ClaimTypes.SerialNumber, appId)
+            };
 
-            return Results.Ok(new {AppId = appId});
+            var jwtToken = new JwtSecurityToken(
+                issuer: configuration["Jwt:Issuer"],
+                audience: configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(30),
+                notBefore: DateTime.UtcNow,
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                    , SecurityAlgorithms.HmacSha256));
+            return Results.Ok(new
+            {
+                AppId = appId,
+                token = jwtToken
+            });
         }
         catch (Exception e)
         {
@@ -54,6 +83,7 @@ public static class ConnectorApi
 
         if (appConnect is null)
             return Results.NotFound();
+
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),

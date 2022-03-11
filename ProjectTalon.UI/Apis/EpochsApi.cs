@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardanoSharp.Koios.Sdk;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -10,8 +12,8 @@ public class EpochsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/epoch/info", GetInfo);
-        app.MapGet("/protocol-parameters", GetProtocolParameters);
+        app.MapGet("/epoch/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInfo);
+        app.MapGet("/protocol-parameters", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetProtocolParameters);
     }
     
     private static async Task<IResult> GetInfo(
