@@ -9,6 +9,8 @@ using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Koios.Sdk.Contracts;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -18,8 +20,8 @@ public static class AddressesApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/address", GetAddress);
-        app.MapGet("/address/info", GetInformation);
+        app.MapGet("/address", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetAddress);
+        app.MapGet("/address/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInformation);
     }
 
     private static async Task<IResult> GetAddress(

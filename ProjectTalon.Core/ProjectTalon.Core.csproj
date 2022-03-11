@@ -11,6 +11,9 @@
     <PackageReference Include="Blockfrost.Api" Version="1.0.0" />
     <PackageReference Include="CardanoSharp.Koios.Sdk" Version="1.0.4" />
     <PackageReference Include="CardanoSharp.Wallet" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.16.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
   </ItemGroup>
 </Project>

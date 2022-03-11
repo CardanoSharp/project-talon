@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardanoSharp.Koios.Sdk;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -10,7 +12,7 @@ public class NetworkApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/network/tip", GetTip);
+        app.MapGet("/network/tip", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetTip);
     }
     
     private static async Task<IResult> GetTip(INetworkClient cardanoClient)
