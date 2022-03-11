@@ -1,5 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Blockfrost.Api.Services;
@@ -7,9 +10,14 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
@@ -22,6 +30,7 @@ public static class ConnectorApi
     public static void AddEndpoints(WebApplication app)
     {
         app.MapPost("/connect", Connect);
+
         app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
     }
 
@@ -38,9 +47,11 @@ public static class ConnectorApi
                 AppId = appId,
                 Name = request.Name,
                 ConnectionStatus = (int) ConnectionStatus.Pending
+            }); ;
+            return Results.Ok(new
+            {
+                AppId = appId,
             });
-
-            return Results.Ok(new {AppId = appId});
         }
         catch (Exception e)
         {
@@ -48,21 +59,34 @@ public static class ConnectorApi
         }
     }
 
-    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase)
+    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase, IConfiguration configuration)
     {
         var appConnect = await appConnectDatabase.GetByAppIdAsync(appId);
 
         if (appConnect is null)
             return Results.NotFound();
+        
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, appConnect.Name),
+            new Claim(ClaimTypes.SerialNumber, appConnect.AppId)
+        };
+
+        var jwtToken = new JwtSecurityToken(
+            issuer: configuration["Jwt:Issuer"],
+            audience: configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30),
+            notBefore: DateTime.UtcNow,
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                , SecurityAlgorithms.HmacSha256));
+
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
-<<<<<<< Updated upstream
-            StatusCode = appConnect.ConnectionStatus
-=======
             StatusCode = appConnect.ConnectionStatus,
             JwtToken = jwtToken,
->>>>>>> Stashed changes
         });
     }
 

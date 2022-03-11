@@ -8,6 +8,8 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using ProjectTalon.Core.Data;
@@ -18,12 +20,12 @@ public static class AccountsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/account/info", GetInfo);
-        app.MapGet("/account/rewards", GetRewards);
-        app.MapGet("/account/history", GetHistory);
-        app.MapGet("/account/updates", GetUpdates);
-        app.MapGet("/account/address", GetAddresses);
-        app.MapGet("/account/assets", GetAssets);
+        app.MapGet("/account/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInfo);
+        app.MapGet("/account/rewards", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetRewards);
+        app.MapGet("/account/history", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetHistory);
+        app.MapGet("/account/updates", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetUpdates);
+        app.MapGet("/account/address", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetAddresses);
+        app.MapGet("/account/assets", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetAssets);
     }
 
     private static async Task<IResult> GetInfo(
