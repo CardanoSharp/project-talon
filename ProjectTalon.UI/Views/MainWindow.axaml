@@ -71,16 +71,26 @@
                 <Label HorizontalAlignment="Center"
                        FontSize="26"
                        FontWeight="Bold">Talon Connector</Label>
-                <Label Content="{Binding Address1}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
-                <Label Content="{Binding Address2}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
-                <Label Content="{Binding Address3}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
-                <Label Content="{Binding Address4}" HorizontalAlignment="Center" FontSize="14" Padding="0" Margin="0" />
+                <Label Content="{Binding Address1}" HorizontalAlignment="Center" FontSize="12" Padding="0" Margin="0" />
+                <Label Content="{Binding Address2}" HorizontalAlignment="Center" FontSize="12" Padding="0" Margin="0" />
+                <Label Content="{Binding Address3}" HorizontalAlignment="Center" FontSize="12" Padding="0" Margin="0" />
+                <Label Content="{Binding Address4}" HorizontalAlignment="Center" FontSize="12" Padding="0" Margin="0" />
                 
-                <Button HorizontalAlignment="Center" Margin="20"
-                        Command="{Binding CopyAddress}">Copy To Clipboard</Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button HorizontalAlignment="Left" Margin="0, 5, 5, 5"
+                            Width="30"
+                            Height="30"
+                            Command="{Binding CopyAddress}">
+                        <PathIcon Data="{StaticResource copy_regular}"  />
+                    </Button>
                 
-                <Button HorizontalAlignment="Center"
-                        Command="{Binding ViewWallet}">Wallet Balance</Button>
+                    <Button HorizontalAlignment="Left"
+                            Width="30"
+                            Height="30"
+                            Command="{Binding ViewWallet}">
+                        <PathIcon Data="{StaticResource window_new_regular}" />
+                    </Button>
+                </StackPanel>
                 
                 <Button HorizontalAlignment="Center"
                         Command="{Binding ViewConnectionsCommand}">View Connections</Button>

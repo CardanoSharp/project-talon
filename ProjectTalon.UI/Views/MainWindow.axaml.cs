@@ -4,10 +4,17 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.ReactiveUI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
@@ -105,6 +112,10 @@ namespace ProjectTalon.UI.Views
 
             var result = await dialog.ShowDialog<ManageSettingsViewModel?>(this);
             interaction.SetOutput(result);
+            
+            //we need to toggle the api here.
+            //ultimately we want to turn on or off the api depending on setting updates
+            //  also making sure we dont mess with the api if settings did not change
         }
         
         private void SetupWindow()
@@ -125,8 +136,49 @@ namespace ProjectTalon.UI.Views
 
         private void InitializeComponent()
         {
-
             AvaloniaXamlLoader.Load(this);
+        }
+
+        private void RunApi(string[] args)
+        {
+            //Api
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
+                {
+                    x.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateActor = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    };
+                }
+            );
+            builder.Services.AddAuthorization();
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAuthorization();
+            app.UseAuthentication();
+
+            app.MapGet("/hello", () =>
+            {
+                return Results.Ok("Hello, World!");
+            });
+
+            app.Run();
         }
     }
 }
