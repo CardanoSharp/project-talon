@@ -8,6 +8,8 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using Blockfrost.Api.Extensions;
+using CardanoSharp.Koios.Sdk;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
+using ProjectTalon.UI.Apis;
 using ProjectTalon.UI.ViewModels;
 using ReactiveUI;
 using Splat;
@@ -25,7 +28,7 @@ namespace ProjectTalon.UI.Views
     public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         private Thread apiThread;
-        
+        private WebApplication? api;
         
         private int paddingRight = 20;
         private int paddingBottom = 85;
@@ -49,9 +52,9 @@ namespace ProjectTalon.UI.Views
                 Disposable
                     .Create(() =>
                     {
-                        if (apiThread != null && apiThread.IsAlive)
+                        if (api != null)
                         {
-                            apiThread.Abort();
+                            Task.Run(async () => await api.StopAsync());
                         }
                     })
                     .DisposeWith(d);
@@ -61,6 +64,25 @@ namespace ProjectTalon.UI.Views
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
 
             Task.Run(async () => await InitializeSettings());
+            Task.Run(async () => await DetermineApiStatus());
+        }
+
+        private async Task DetermineApiStatus()
+        {
+            var settingsDatabase = Locator.Current.GetService<ISettingsDatabase>();
+            var apiSettings = await settingsDatabase.GetByKeyAsync(SettingKeys.API_ENABLED);
+            
+            if (api is null && (apiThread is null || !apiThread.IsAlive) && apiSettings.Value == true.ToString())
+            {
+                apiThread = new Thread(new ThreadStart(() => RunApi(new string[]{})));
+                apiThread.Start();
+            }
+
+            if (api is not null && (apiThread is null || apiThread.IsAlive) && apiSettings.Value == false.ToString())
+            {
+                await api.StopAsync();
+                api = null;
+            }
         }
 
         private async Task InitializeSettings()
@@ -126,10 +148,8 @@ namespace ProjectTalon.UI.Views
 
             var result = await dialog.ShowDialog<ManageSettingsViewModel?>(this);
             interaction.SetOutput(result);
-            
-            //we need to toggle the api here.
-            //ultimately we want to turn on or off the api depending on setting updates
-            //  also making sure we dont mess with the api if settings did not change
+
+            await DetermineApiStatus();
         }
         
         private void SetupWindow()
@@ -160,6 +180,15 @@ namespace ProjectTalon.UI.Views
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
+            builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
+
+            builder.Services.AddKoios("https://koios-api.testnet.dandelion.link/rpc");
+
+            builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
+            builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
+            builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
+            
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
                 {
                     x.TokenValidationParameters = new TokenValidationParameters()
@@ -175,24 +204,38 @@ namespace ProjectTalon.UI.Views
                 }
             );
             builder.Services.AddAuthorization();
-            var app = builder.Build();
+            api = builder.Build();
 
-            if (app.Environment.IsDevelopment())
+            if (api.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                api.UseSwagger();
+                api.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
-            app.UseAuthentication();
+            api.UseHttpsRedirection();
+            api.UseAuthorization();
+            api.UseAuthentication();
 
-            app.MapGet("/hello", () =>
+            api.MapGet("/hello", () =>
             {
                 return Results.Ok("Hello, World!");
             });
+            
+            ConnectorApi.AddEndpoints(api);
+            AccountsApi.AddEndpoints(api);
+            AddressesApi.AddEndpoints(api);
+            AssetsApi.AddEndpoints(api);
+            BlocksApi.AddEndpoints(api);
+            EpochsApi.AddEndpoints(api);
+            LedgerApi.AddEndpoints(api);
+            MetadataApi.AddEndpoints(api);
+            NetworkApi.AddEndpoints(api);
+            MetadataApi.AddEndpoints(api);
+            PoolsApi.AddEndpoints(api);
+            ScriptsApi.AddEndpoints(api);
+            TransactionsApi.AddEndpoints(api);
 
-            app.Run();
+            api.Run();
         }
     }
 }
