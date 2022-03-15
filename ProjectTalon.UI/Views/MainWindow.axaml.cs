@@ -1,17 +1,16 @@
-using System;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Avalonia.ReactiveUI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -21,11 +20,13 @@ using ProjectTalon.Core.Data.Models;
 using ProjectTalon.UI.ViewModels;
 using ReactiveUI;
 using Splat;
-
 namespace ProjectTalon.UI.Views
 {
     public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
+        private Thread apiThread;
+        
+        
         private int paddingRight = 20;
         private int paddingBottom = 85;
 
@@ -37,11 +38,24 @@ namespace ProjectTalon.UI.Views
 #if DEBUG
             this.AttachDevTools();
 #endif
-
+            
             this.WhenActivated(d => d(ViewModel!.ImportWalletDialog.RegisterHandler(ShowImportWalletDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.CreateWalletDialog.RegisterHandler(ShowCreateWalletDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewConnectionsDialog.RegisterHandler(ShowConnectionsDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewSettingsDialog.RegisterHandler(ShowSettingsDialogAsync)));
+            
+            this.WhenActivated(d =>
+            {
+                Disposable
+                    .Create(() =>
+                    {
+                        if (apiThread != null && apiThread.IsAlive)
+                        {
+                            apiThread.Abort();
+                        }
+                    })
+                    .DisposeWith(d);
+            });
             
             SetupWindow();
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
