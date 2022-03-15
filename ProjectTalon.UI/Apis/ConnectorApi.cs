@@ -81,8 +81,6 @@ public static class ConnectorApi
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(5),
-                Issuer = configuration["Jwt:Issuer"],
-                Audience = configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])), 
                     SecurityAlgorithms.HmacSha256Signature)

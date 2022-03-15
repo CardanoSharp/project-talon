@@ -12,7 +12,7 @@ public class NetworkApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/network/tip", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetTip);
+        app.MapGet("/network/tip", [Authorize] () => GetTip);
     }
     
     private static async Task<IResult> GetTip(INetworkClient cardanoClient)

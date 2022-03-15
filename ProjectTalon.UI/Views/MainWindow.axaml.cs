@@ -201,11 +201,10 @@ namespace ProjectTalon.UI.Views
                     x.SaveToken = true;
                     x.TokenValidationParameters = new TokenValidationParameters()
                     {
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateLifetime = false,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                     };
                 }
