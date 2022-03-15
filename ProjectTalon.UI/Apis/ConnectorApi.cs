@@ -59,34 +59,48 @@ public static class ConnectorApi
         }
     }
 
-    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase, IConfiguration configuration)
+    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase,
+        IConfiguration configuration)
     {
         var appConnect = await appConnectDatabase.GetByAppIdAsync(appId);
 
         if (appConnect is null)
             return Results.NotFound();
         
-        var claims = new[]
+        if((ConnectionStatus) appConnect.ConnectionStatus == ConnectionStatus.Approved)
         {
-            new Claim(ClaimTypes.NameIdentifier, appConnect.Name),
-            new Claim(ClaimTypes.SerialNumber, appConnect.AppId)
-        };
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, appConnect.Name),
+                new Claim(ClaimTypes.SerialNumber, appConnect.AppId)
+            };
 
-        var jwtToken = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(30),
-            notBefore: DateTime.UtcNow,
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
-                , SecurityAlgorithms.HmacSha256));
+            var tokenHandler = new JwtSecurityTokenHandler();
 
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(5),
+                Issuer = configuration["Jwt:Issuer"],
+                Audience = configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])), 
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Results.Ok(new
+            {
+                Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
+                StatusCode = appConnect.ConnectionStatus,
+                JwtToken = tokenHandler.WriteToken(token),
+            });
+        }
+        
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
             StatusCode = appConnect.ConnectionStatus,
-            JwtToken = jwtToken,
         });
     }
 

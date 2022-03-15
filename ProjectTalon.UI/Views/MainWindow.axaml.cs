@@ -183,17 +183,24 @@ namespace ProjectTalon.UI.Views
             
             builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 
-            builder.Services.AddKoios("https://koios-api.testnet.dandelion.link/rpc");
+            builder.Services.AddKoios("https://testnet.koios.rest/api/v0");
 
             builder.Services.AddTransient<IWalletDatabase, WalletDatabase>();
             builder.Services.AddTransient<IWalletKeyDatabase, WalletKeyDatabase>();
             builder.Services.AddTransient<IAppConnectDatabase, AppConnectDatabase>();
             
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
+            builder.Services
+                .AddAuthentication(x =>
                 {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(x =>
+                {
+                    x.RequireHttpsMetadata = false;
+                    x.SaveToken = true;
                     x.TokenValidationParameters = new TokenValidationParameters()
                     {
-                        ValidateActor = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
@@ -203,7 +210,9 @@ namespace ProjectTalon.UI.Views
                     };
                 }
             );
+            
             builder.Services.AddAuthorization();
+            
             api = builder.Build();
 
             if (api.Environment.IsDevelopment())
