@@ -20,12 +20,12 @@ public static class AddressesApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/address", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetAddress);
-        app.MapGet("/address/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInformation);
+        app.MapGet("/address", GetAddress).Produces<string?>();
+        app.MapGet("/address/info", GetInformation).Produces<AddressInformation[]>();
     }
 
     private static async Task<IResult> GetAddress(
-        IWalletKeyDatabase keyDatabase, 
+        IWalletKeyDatabase keyDatabase,
         string? addressIndex = null)
     {
         try
@@ -35,7 +35,7 @@ public static class AddressesApi
             {
                 index = int.Parse(addressIndex);
             }
-            
+
             return Results.Ok(await GetWalletAddress(keyDatabase, index));
         }
         catch (Exception e)
@@ -74,14 +74,14 @@ public static class AddressesApi
     private static async Task<string?> GetWalletAddress(IWalletKeyDatabase keyDatabase, int? addressIndex = null)
     {
         addressIndex ??= 0;
-            
+
         var wallet = await keyDatabase.GetWalletKeysAsync(1);
         var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
         if (publicKey is null)
             throw new Exception("Wallet not found");
         var payment = publicKey
             .Derive(RoleType.ExternalChain)
-            .Derive((int)addressIndex);
+            .Derive((int) addressIndex);
 
         var stake = publicKey
             .Derive(RoleType.Staking)

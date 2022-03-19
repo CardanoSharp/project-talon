@@ -29,9 +29,9 @@ public static class ConnectorApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapPost("/connect", Connect);
+        app.MapPost("/connect", Connect).AllowAnonymous();
 
-        app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
+        app.MapGet("/connect/{appId}/status", CheckConnectionStatus).AllowAnonymous();
     }
 
     private static async Task<IResult> Connect(

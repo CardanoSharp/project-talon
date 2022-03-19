@@ -17,16 +17,16 @@ public class AssetsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/assets/addresses/{policyId}/{assetName}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetAddresses);
-        app.MapGet("/assets/info/{policyId}/{assetName}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInfo);
-        app.MapGet("/assets/transaction/{policyId}/{assetName}", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetTransactions);
+        app.MapGet("/assets/addresses/{policyId}/{assetName}", GetAddresses).Produces<AssetAddress[]>();
+        app.MapGet("/assets/info/{policyId}/{assetName}", GetInfo).Produces<AssetInformation[]>();
+        app.MapGet("/assets/transaction/{policyId}/{assetName}", GetTransactions).Produces<AssetTransaction[]>();
     }
 
     private static async Task<IResult> GetAddresses(
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -40,7 +40,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -53,7 +53,7 @@ public class AssetsApi
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -67,7 +67,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -80,7 +80,7 @@ public class AssetsApi
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -94,7 +94,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)

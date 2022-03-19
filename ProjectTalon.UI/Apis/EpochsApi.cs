@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardanoSharp.Koios.Sdk;
+using CardanoSharp.Koios.Sdk.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -12,14 +13,14 @@ public class EpochsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/epoch/info", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetInfo);
-        app.MapGet("/protocol-parameters", [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)] () => GetProtocolParameters);
+        app.MapGet("/epoch/info", GetInfo).Produces<EpochInformation[]>();
+        app.MapGet("/protocol-parameters", GetProtocolParameters).Produces<ProtocolParameters[]>();
     }
-    
+
     private static async Task<IResult> GetInfo(
-        IEpochClient cardanoClient, 
+        IEpochClient cardanoClient,
         string? epochNo = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -31,11 +32,11 @@ public class EpochsApi
             return Results.Problem(e.Message);
         }
     }
-    
+
     private static async Task<IResult> GetProtocolParameters(
-        IEpochClient cardanoClient, 
+        IEpochClient cardanoClient,
         string? epochNo = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
