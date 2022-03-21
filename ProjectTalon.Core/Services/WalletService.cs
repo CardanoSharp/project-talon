@@ -42,7 +42,7 @@ namespace ProjectTalon.Core.Services
             int walletId = 0;
             int walletKeyId = 0;
 
-            if (await _walletDatabase.WalletExistsAsync(name))
+            if (await _walletDatabase.ExistsAsync(name))
             {
                 throw new Exception("Wallet already exists");
             }
@@ -52,13 +52,13 @@ namespace ProjectTalon.Core.Services
             //transaction.BeginTransaction();
             int accountIx = 0;
 
-            walletId = await _walletDatabase.SaveWalletAsync(new Wallet
+            walletId = await _walletDatabase.SaveAsync(new Wallet
             {
                 Name = name,
                 WalletType = (int)WalletType.HD,
             });
 
-            newlyCreatedWallet = await _walletDatabase.GetWalletByNameAsync(name);
+            newlyCreatedWallet = await _walletDatabase.GetByNameAsync(name);
 
             var accountNode = mnemonic.GetMasterNode()
                 .Derive(PurposeType.Shelley)
@@ -79,8 +79,8 @@ namespace ProjectTalon.Core.Services
             //    transaction.Commit();
             //});
 
-            var wallets = await _walletDatabase.GetWalletsAsync();
-            var wallet = await _walletDatabase.GetWalletAsync(walletId);
+            var wallets = await _walletDatabase.ListAsync();
+            var wallet = await _walletDatabase.GetByIdAsync(walletId);
             var walletKey = await _walletKeyDatabase.GetWalletKeyAsync(walletKeyId);
         }
     }

@@ -4,11 +4,14 @@ using Avalonia.Markup.Xaml;
 
 namespace ProjectTalon.UI.Views;
 
-public partial class ImportWalletView : UserControl
+public partial class ImportWalletWindow : Window
 {
-    public ImportWalletView()
+    public ImportWalletWindow()
     {
         InitializeComponent();
+#if DEBUG
+        this.AttachDevTools();
+#endif
     }
 
     private void InitializeComponent()

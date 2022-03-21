@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Koios.Sdk.Contracts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +15,7 @@ using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
 using ProjectTalon.Core.Requests;
 using ProjectTalon.Core.Services;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace ProjectTalon.UI.Apis;
 
@@ -19,11 +23,11 @@ public class TransactionsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapPost("/transactions/info", GetInfo);
-        app.MapPost("/transactions/utxo", GetUtxo);
-        app.MapPost("/transactions/metadata", GetMetadata);
-        app.MapPost("/transaction/submit/{appId}", SubmitTransaction);
-        app.MapPost("/transaction/status/{appId}/{referenceId}", StatusTransaction);
+        app.MapPost("/transactions/info", GetInfo).Produces<Transaction[]>();
+        app.MapPost("/transactions/utxo", GetUtxo).Produces<Transaction[]>();
+        app.MapPost("/transactions/metadata", GetMetadata).Produces<TransactionMetadata[]>();
+        app.MapPost("/transaction/submit/{appId}", SubmitTransaction).Produces<UnknownSwaggerDocument>();
+        app.MapPost("/transaction/status/{appId}/{referenceId}", StatusTransaction).Produces<UnknownSwaggerDocument>();
     }
 
     private static async Task<IResult> StatusTransaction(
@@ -34,8 +38,11 @@ public class TransactionsApi
         try
         {
             var transactionRequest = await transactionDatabase.GetAsync(referenceId, appId);
-            
-            return Results.Ok(new { ReferenceId = referenceId, Status = ((TransactionRequestStatus)transactionRequest.StatusId).ToString() });
+
+            return Results.Ok(new
+            {
+                ReferenceId = referenceId, Status = ((TransactionRequestStatus) transactionRequest.StatusId).ToString()
+            });
         }
         catch (Exception e)
         {
@@ -44,10 +51,10 @@ public class TransactionsApi
     }
 
     private static async Task<IResult> SubmitTransaction(
+        [FromBody] TransactionSubmitRequest request,
         ITransactionRequestDatabase transactionDatabase,
         ITransactionService transactionService,
         IAddressService addressService,
-        [FromBody] TransactionSubmitRequest request,
         string appId)
     {
         try
@@ -56,7 +63,7 @@ public class TransactionsApi
             var transactionRequest = new TransactionRequest()
             {
                 AppId = appId,
-                StatusId = (int)TransactionRequestStatus.Pending,
+                StatusId = (int) TransactionRequestStatus.Pending,
                 CreatedUtc = DateTime.UtcNow,
                 Parameters = JsonConvert.SerializeObject(new
                 {
@@ -67,8 +74,8 @@ public class TransactionsApi
             };
 
             await transactionDatabase.SaveAsync(transactionRequest);
-            
-            return Results.Ok(new { ReferenceId = referenceId });
+
+            return Results.Ok(new {ReferenceId = referenceId});
         }
         catch (Exception e)
         {
@@ -77,9 +84,9 @@ public class TransactionsApi
     }
 
     private static async Task<IResult> GetInfo(
-        ITransactionClient cardanoClient, 
+        ITransactionClient cardanoClient,
         [FromBody] GetTransactionRequest request,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -93,7 +100,7 @@ public class TransactionsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -103,9 +110,9 @@ public class TransactionsApi
     }
 
     private static async Task<IResult> GetUtxo(
-        ITransactionClient cardanoClient, 
+        ITransactionClient cardanoClient,
         [FromBody] GetTransactionRequest request,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -119,7 +126,7 @@ public class TransactionsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -129,9 +136,9 @@ public class TransactionsApi
     }
 
     private static async Task<IResult> GetMetadata(
-        ITransactionClient cardanoClient, 
+        ITransactionClient cardanoClient,
         [FromBody] GetTransactionRequest request,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -145,7 +152,7 @@ public class TransactionsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)

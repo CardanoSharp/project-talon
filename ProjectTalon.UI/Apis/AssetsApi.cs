@@ -6,6 +6,8 @@ using Blockfrost.Api.Services;
 using Blockfrost.Api.Services.Extensions;
 using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Koios.Sdk.Contracts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -15,16 +17,16 @@ public class AssetsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/assets/addresses/{policyId}/{assetName}", GetAddresses);
-        app.MapGet("/assets/info/{policyId}/{assetName}", GetInfo);
-        app.MapGet("/assets/transaction/{policyId}/{assetName}", GetTransactions);
+        app.MapGet("/assets/addresses/{policyId}/{assetName}", GetAddresses).Produces<AssetAddress[]>();
+        app.MapGet("/assets/info/{policyId}/{assetName}", GetInfo).Produces<AssetInformation[]>();
+        app.MapGet("/assets/transaction/{policyId}/{assetName}", GetTransactions).Produces<AssetTransaction[]>();
     }
 
     private static async Task<IResult> GetAddresses(
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -38,7 +40,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -51,7 +53,7 @@ public class AssetsApi
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -65,7 +67,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -78,7 +80,7 @@ public class AssetsApi
         IAssetClient cardanoClient,
         string policyId,
         string assetName,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -92,7 +94,7 @@ public class AssetsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)

@@ -1,9 +1,8 @@
-﻿namespace ProjectTalon.UI.ViewModels;
+﻿using ProjectTalon.UI.Views;
+using ReactiveUI;
+
+namespace ProjectTalon.UI.ViewModels;
 
 public class ImportWalletViewModel: ViewModelBase
 {
-    public ImportWalletViewModel()
-    {
-            
-    }
 }

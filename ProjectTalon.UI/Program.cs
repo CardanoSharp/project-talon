@@ -8,9 +8,11 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CardanoSharp.Wallet;
 using ProjectTalon.Core.Data;
 using ProjectTalon.UI.ViewModels;
 using Splat;
+using WalletService = ProjectTalon.Core.Services.WalletService;
 
 namespace ProjectTalon.UI
 {
@@ -44,9 +46,12 @@ namespace ProjectTalon.UI
             services.Register<IAppConnectDatabase>(() => new AppConnectDatabase());
             services.Register<ITransactionRequestDatabase>(() => new TransactionRequestDatabase());
             services.Register<ISettingsDatabase>(() => new SettingsDatabase());
-            // services.RegisterLazySingleton<IMainWindowViewModel>(() => new MainWindowViewModel(
-            //     resolver.GetService<IWalletDatabase>()
-            // ));
+
+            services.Register<Core.Services.IWalletService>(() => new WalletService(
+                new MnemonicService(),
+                resolver.GetService<IWalletKeyDatabase>(),
+                resolver.GetService<IWalletDatabase>()
+                ));
         }
     }
 }

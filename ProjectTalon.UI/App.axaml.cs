@@ -1,12 +1,15 @@
+using System.Text;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Data;
 using ProjectTalon.UI.ViewModels;
 using ProjectTalon.UI.Views;
@@ -35,36 +38,8 @@ namespace ProjectTalon.UI
                     DataContext = new MainWindowViewModel(),
                 };
             }
-
-            // Thread api = new Thread(new ThreadStart(() => RunApi(args)));
-            // api.Start();
             
             base.OnFrameworkInitializationCompleted();
-        }
-
-        public void RunApi(string[] args)
-        {
-            //Api
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.MapGet("/hello", () =>
-            {
-                return Results.Ok("Hello, World!");
-            });
-
-            app.Run();
         }
     }
 }

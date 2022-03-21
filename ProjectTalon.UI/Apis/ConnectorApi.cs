@@ -1,5 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Blockfrost.Api.Services;
@@ -7,9 +10,14 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
@@ -21,8 +29,9 @@ public static class ConnectorApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapPost("/connect", Connect);
-        app.MapGet("/connect/{appId}/status", CheckConnectionStatus);
+        app.MapPost("/connect", Connect).AllowAnonymous();
+
+        app.MapGet("/connect/{appId}/status", CheckConnectionStatus).AllowAnonymous();
     }
 
     private static async Task<IResult> Connect(
@@ -38,9 +47,11 @@ public static class ConnectorApi
                 AppId = appId,
                 Name = request.Name,
                 ConnectionStatus = (int) ConnectionStatus.Pending
+            }); ;
+            return Results.Ok(new
+            {
+                AppId = appId,
             });
-
-            return Results.Ok(new {AppId = appId});
         }
         catch (Exception e)
         {
@@ -48,16 +59,46 @@ public static class ConnectorApi
         }
     }
 
-    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase)
+    private static async Task<IResult> CheckConnectionStatus(string appId, IAppConnectDatabase appConnectDatabase,
+        IConfiguration configuration)
     {
         var appConnect = await appConnectDatabase.GetByAppIdAsync(appId);
 
         if (appConnect is null)
             return Results.NotFound();
+        
+        if((ConnectionStatus) appConnect.ConnectionStatus == ConnectionStatus.Approved)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, appConnect.Name),
+                new Claim(ClaimTypes.SerialNumber, appConnect.AppId)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(5),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])), 
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Results.Ok(new
+            {
+                Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
+                StatusCode = appConnect.ConnectionStatus,
+                JwtToken = tokenHandler.WriteToken(token),
+            });
+        }
+        
         return Results.Ok(new
         {
             Status = ((ConnectionStatus) appConnect.ConnectionStatus).ToString(),
-            StatusCode = appConnect.ConnectionStatus
+            StatusCode = appConnect.ConnectionStatus,
         });
     }
 
@@ -78,7 +119,7 @@ public static class ConnectorApi
     {
         try
         {
-            var wallets = await walletdatabase.GetWalletsAsync();
+            var wallets = await walletdatabase.ListAsync();
             var wallet = await keyDatabase.GetWalletKeysAsync(id);
             var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
 

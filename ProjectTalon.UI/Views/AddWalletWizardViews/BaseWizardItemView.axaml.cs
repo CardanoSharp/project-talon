@@ -2,11 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace ProjectTalon.UI.Views;
+namespace ProjectTalon.UI.Views.AddWalletWizardViews;
 
-public partial class GenerateWalletView : UserControl
+public partial class BaseWizardItemView : UserControl
 {
-    public GenerateWalletView()
+    public BaseWizardItemView()
     {
         InitializeComponent();
     }

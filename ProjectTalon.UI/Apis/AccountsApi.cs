@@ -8,6 +8,8 @@ using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using ProjectTalon.Core.Data;
@@ -18,19 +20,19 @@ public static class AccountsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/account/info", GetInfo);
-        app.MapGet("/account/rewards", GetRewards);
-        app.MapGet("/account/history", GetHistory);
-        app.MapGet("/account/updates", GetUpdates);
-        app.MapGet("/account/address", GetAddresses);
-        app.MapGet("/account/assets", GetAssets);
+        app.MapGet("/account/info", GetInfo).RequireAuthorization().Produces<StakeInformation[]>();
+        app.MapGet("/account/rewards", GetRewards).Produces<StakeReward[]>();
+        app.MapGet("/account/history", GetHistory).Produces<StakeHistory[]>();
+        app.MapGet("/account/updates", GetUpdates).Produces<StakeUpdate[]>();
+        app.MapGet("/account/address", GetAddresses).Produces<StakeAddress[]>();
+        app.MapGet("/account/assets", GetAssets).Produces<string>();
     }
 
     private static async Task<IResult> GetInfo(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
@@ -43,19 +45,19 @@ public static class AccountsApi
             return Results.Problem(e.Message);
         }
     }
-    
+
     private static async Task<IResult> GetRewards(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
         string? epochNo = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
         {
             address ??= await GetStakeAddress(keyDatabase);
-            
+
             var response = Array.Empty<StakeReward>();
             try
             {
@@ -65,7 +67,7 @@ public static class AccountsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -75,16 +77,16 @@ public static class AccountsApi
     }
 
     private static async Task<IResult> GetHistory(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
         {
             address ??= await GetStakeAddress(keyDatabase);
-            
+
             var response = Array.Empty<StakeHistory>();
             try
             {
@@ -94,7 +96,7 @@ public static class AccountsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -104,16 +106,16 @@ public static class AccountsApi
     }
 
     private static async Task<IResult> GetUpdates(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
         {
             address ??= await GetStakeAddress(keyDatabase);
-            
+
             var response = Array.Empty<StakeUpdate>();
             try
             {
@@ -123,7 +125,7 @@ public static class AccountsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -133,16 +135,16 @@ public static class AccountsApi
     }
 
     private static async Task<IResult> GetAddresses(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
         {
             address ??= await GetStakeAddress(keyDatabase);
-            
+
             var response = Array.Empty<StakeAddress>();
             try
             {
@@ -152,7 +154,7 @@ public static class AccountsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
@@ -162,16 +164,16 @@ public static class AccountsApi
     }
 
     private static async Task<IResult> GetAssets(
-        IAccountClient cardanoClient, 
+        IAccountClient cardanoClient,
         IWalletKeyDatabase keyDatabase,
         string? address = null,
-        int limit = 25, 
+        int limit = 25,
         int offset = 0)
     {
         try
         {
             address ??= await GetStakeAddress(keyDatabase);
-            
+
             var response = Array.Empty<StakeAsset>();
             try
             {
@@ -181,7 +183,7 @@ public static class AccountsApi
             {
                 // ignored
             }
-            
+
             return Results.Ok(response);
         }
         catch (Exception e)
