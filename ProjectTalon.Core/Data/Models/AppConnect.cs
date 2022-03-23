@@ -15,6 +15,6 @@ namespace ProjectTalon.Core.Data.Models
         public string AppId { get; set; }   
         public int ConnectionStatus { get; set; }
         
-        public string token { get; set; }
+        public bool HasReviewed { get; set; }
     }
 }

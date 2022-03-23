@@ -50,6 +50,7 @@ namespace ProjectTalon.UI.Views
             this.WhenActivated(d => d(ViewModel!.CreateWalletDialog.RegisterHandler(ShowCreateWalletDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewConnectionsDialog.RegisterHandler(ShowConnectionsDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewSettingsDialog.RegisterHandler(ShowSettingsDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.AuthorizeAppDialog.RegisterHandler(ShowAuthorizeAppDialogAsync)));
             
             this.WhenActivated(d =>
             {
@@ -156,6 +157,19 @@ namespace ProjectTalon.UI.Views
             await DetermineApiStatus();
         }
         
+        private async Task ShowAuthorizeAppDialogAsync(InteractionContext<AuthorizeAppViewModel, AuthorizeAppViewModel?> interaction)
+        {
+            var dialog = new AuthorizeAppWindow();
+            dialog.Width = 350;
+            dialog.Height = 600;
+            dialog.DataContext = interaction.Input;
+
+            var result = await dialog.ShowDialog<AuthorizeAppViewModel?>(this);
+            interaction.SetOutput(result);
+
+            ViewModel.AuthAppWindowIsOpen = false;
+        }
+        
         private void SetupWindow()
         {
             Width = 350;
@@ -223,16 +237,10 @@ namespace ProjectTalon.UI.Views
                     .Build();
             });
             
-            builder.Services.AddAuthorization();
-            
             api = builder.Build();
 
-            if (api.Environment.IsDevelopment())
-            {
-                api.UseSwagger();
-                api.UseSwaggerUI();
-                
-            }
+            api.UseSwagger();
+            api.UseSwaggerUI();
 
             api.UseHttpsRedirection();
             api.UseAuthentication();

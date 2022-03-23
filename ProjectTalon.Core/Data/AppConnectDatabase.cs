@@ -1,4 +1,5 @@
-﻿using ProjectTalon.Core.Data.Models;
+﻿using ProjectTalon.Core.Common;
+using ProjectTalon.Core.Data.Models;
 
 namespace ProjectTalon.Core.Data
 {
@@ -6,6 +7,7 @@ namespace ProjectTalon.Core.Data
     {
         Task<List<AppConnect>> ListAsync();
         Task<AppConnect> GetAsync(int id);
+        Task<AppConnect?> GetPendingAuthAsync();
         Task<AppConnect> GetByAppIdAsync(string appId);
         Task<int> SaveAsync(AppConnect appConnect);
         Task<int> DeleteAsync(AppConnect appConnect);
@@ -28,6 +30,13 @@ namespace ProjectTalon.Core.Data
             return await database.Table<AppConnect>()
                             .Where(i => i.Id == id)
                             .FirstOrDefaultAsync();
+        }
+        public async Task<AppConnect?> GetPendingAuthAsync()
+        {
+            return await database.Table<AppConnect>()
+                .Where(i => !i.HasReviewed 
+                    && i.ConnectionStatus == (int)ConnectionStatus.Pending)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<AppConnect> GetByAppIdAsync(string appId)
