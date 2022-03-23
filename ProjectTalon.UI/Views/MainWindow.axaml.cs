@@ -11,6 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using Blockfrost.Api.Extensions;
 using CardanoSharp.Koios.Sdk;
+using CardanoSharp.Wallet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -27,6 +28,9 @@ using ProjectTalon.UI.Apis;
 using ProjectTalon.UI.ViewModels;
 using ReactiveUI;
 using Splat;
+using AddressService = ProjectTalon.Core.Services.AddressService;
+using IAddressService = ProjectTalon.Core.Services.IAddressService;
+
 namespace ProjectTalon.UI.Views
 {
     public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
@@ -228,6 +232,8 @@ namespace ProjectTalon.UI.Views
             builder.Services.AddTransient<ITransactionService, TransactionService>();
             builder.Services.AddTransient<IAddressService, AddressService>();
 
+            builder.Services.AddTransient<IMnemonicService, MnemonicService>();
+            
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
             builder.Services.AddAuthorization(options =>
             {

@@ -11,8 +11,46 @@
         <vm:AuthorizeAppViewModel/>
     </Design.DataContext>
     
-    <Panel>
-        <Label Content="{Binding Connection.Name}" />
-    </Panel>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+            
+            <StackPanel>
+                <Label HorizontalAlignment="Center"
+                       FontSize="26"
+                       FontWeight="Bold" Content="{Binding Connection.Name}"/>
+ 
+                <Label HorizontalAlignment="Center"
+                       FontSize="16"
+                       Margin="0,5, 0, 20">This application would like to connect</Label>
+                
+                <Grid HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button HorizontalAlignment="Left"
+                            Classes="Primary"
+                            Command="{Binding ApproveAppCommand}">Approve</Button>
+                    <Button HorizontalAlignment="Right" Grid.Column="2"
+                            Background="Gray"
+                            Command="{Binding DenyAppCommand}">Cancel</Button>
+                </Grid>
+                
+            </StackPanel>
+        </StackPanel>
+    </Grid>
     
 </Window>
