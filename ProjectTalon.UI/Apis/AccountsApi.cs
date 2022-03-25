@@ -20,7 +20,7 @@ public static class AccountsApi
 {
     public static void AddEndpoints(WebApplication app)
     {
-        app.MapGet("/account/info", GetInfo).RequireAuthorization().Produces<StakeInformation[]>();
+        app.MapGet("/account/info", GetInfo).Produces<StakeInformation[]>();
         app.MapGet("/account/rewards", GetRewards).Produces<StakeReward[]>();
         app.MapGet("/account/history", GetHistory).Produces<StakeHistory[]>();
         app.MapGet("/account/updates", GetUpdates).Produces<StakeUpdate[]>();

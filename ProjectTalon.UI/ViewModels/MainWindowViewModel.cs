@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Threading;
 using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Components.Web;
 using ProjectTalon.Core.Common;
 using ReactiveUI;
 using ProjectTalon.Core.Data;
+using ProjectTalon.Core.Data.Models;
 using Splat;
 
 namespace ProjectTalon.UI.ViewModels
@@ -26,14 +28,19 @@ namespace ProjectTalon.UI.ViewModels
         private readonly IWalletDatabase _walletDatabase;
         private readonly IWalletKeyDatabase _walletKeyDatabase;
         private readonly ISettingsDatabase _settingsDatabase;
+        
+        public bool AuthAppWindowIsOpen { get; set; }
+        
         public ICommand CreateWalletCommand { get; }
         public ICommand ImportWalletCommand { get; }
         public ICommand ViewConnectionsCommand { get; }
         public ICommand ViewSettingsCommand { get; }
+        public ICommand AuthorizeAppCommand { get; }
         public Interaction<ImportWalletViewModel, ImportWalletWizardViewModel?> ImportWalletDialog { get; }
         public Interaction<CreateWalletViewModel, CreateWalletViewModel?> CreateWalletDialog { get; }
         public Interaction<ConnectionsViewModel, ViewConnectionsViewModel?> ViewConnectionsDialog { get; }
         public Interaction<SettingsViewModel, ManageSettingsViewModel?> ViewSettingsDialog { get; }
+        public Interaction<AuthorizeAppViewModel, AuthorizeAppViewModel?> AuthorizeAppDialog { get; }
 
         private int? _walletId;
         public int? WalletId
@@ -110,6 +117,7 @@ namespace ProjectTalon.UI.ViewModels
             CreateWalletDialog = new Interaction<CreateWalletViewModel, CreateWalletViewModel?>();
             ViewConnectionsDialog = new Interaction<ConnectionsViewModel, ViewConnectionsViewModel?>();
             ViewSettingsDialog = new Interaction<SettingsViewModel, ManageSettingsViewModel?>();
+            AuthorizeAppDialog = new Interaction<AuthorizeAppViewModel, AuthorizeAppViewModel?>();
             
             ImportWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -145,8 +153,45 @@ namespace ProjectTalon.UI.ViewModels
 
                 await ViewSettingsDialog.Handle(vm);
             });
+            
+            AuthorizeAppCommand = ReactiveCommand.CreateFromTask(async (AppConnect connection) =>
+            {
+                var vm = new AuthorizeAppViewModel()
+                {
+                    Connection = connection
+                };
+
+                var result = await AuthorizeAppDialog.Handle(vm);
+
+                if (result != null)
+                {
+                    //do something
+                }
+            });
 
             Task.Run(async () => await WalletExists());
+            Task.Run(async () => await CheckPendingConnections());
+        }
+
+        private async Task CheckPendingConnections()
+        {
+            var appConnectionDb = Locator.Current.GetService<IAppConnectDatabase>();
+
+            while (true)
+            {
+                if (!AuthAppWindowIsOpen)
+                {
+                    var connection = await appConnectionDb.GetPendingAuthAsync();
+                    if (connection != null)
+                    {
+                        AuthAppWindowIsOpen = true;
+                        connection.HasReviewed = true;
+                        await appConnectionDb.SaveAsync(connection);
+
+                        await Dispatcher.UIThread.InvokeAsync(() => AuthorizeAppCommand.Execute(connection));
+                    }
+                }
+            }
         }
 
         private async Task SetupWalletDashboard()
