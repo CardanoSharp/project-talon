@@ -235,13 +235,13 @@ namespace ProjectTalon.UI.Views
             builder.Services.AddTransient<IMnemonicService, MnemonicService>();
             
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-            builder.Services.AddAuthorization(options =>
-            {
-                options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                    .RequireAuthenticatedUser()
-                    .Build();
-            });
+            // builder.Services.AddAuthorization(options =>
+            // {
+            //     // options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            //     //     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            //     //     .RequireAuthenticatedUser()
+            //     //     .Build();
+            // });
             
             api = builder.Build();
 
@@ -250,13 +250,8 @@ namespace ProjectTalon.UI.Views
 
             api.UseHttpsRedirection();
             api.UseAuthentication();
-            api.UseAuthorization();
+            //api.UseAuthorization();
 
-            api.MapGet("/hello", () =>
-            {
-                return Results.Ok("Hello, World!");
-            });
-            
             ConnectorApi.AddEndpoints(api);
             AccountsApi.AddEndpoints(api);
             AddressesApi.AddEndpoints(api);

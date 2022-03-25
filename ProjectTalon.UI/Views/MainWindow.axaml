@@ -92,8 +92,6 @@
                     </Button>
                 </StackPanel>
                 
-                <Button HorizontalAlignment="Center"
-                        Command="{Binding ViewConnectionsCommand}">View Connections</Button>
             </StackPanel>
         </StackPanel>
     </Grid>
