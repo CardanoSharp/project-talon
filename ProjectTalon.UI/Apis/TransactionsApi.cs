@@ -26,8 +26,8 @@ public class TransactionsApi
         app.MapPost("/transactions/info", GetInfo).Produces<Transaction[]>();
         app.MapPost("/transactions/utxo", GetUtxo).Produces<Transaction[]>();
         app.MapPost("/transactions/metadata", GetMetadata).Produces<TransactionMetadata[]>();
-        app.MapPost("/transaction/submit/{appId}", SubmitTransaction).Produces<UnknownSwaggerDocument>();
-        app.MapPost("/transaction/status/{appId}/{referenceId}", StatusTransaction).Produces<UnknownSwaggerDocument>();
+        app.MapPost("/transaction/submit/{appId}", SubmitTransaction).Produces<Transaction>();
+        app.MapPost("/transaction/status/{appId}/{referenceId}", StatusTransaction).Produces<Transaction>();
     }
 
     private static async Task<IResult> StatusTransaction(

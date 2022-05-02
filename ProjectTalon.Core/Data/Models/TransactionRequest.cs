@@ -16,6 +16,7 @@ public class TransactionRequest
     public string? TransactionHash { get; set; }
     public string? Error { get; set; }
     public DateTime CreatedUtc { get; set; }
+    public bool HasReviewed { get; set; }
 
     [Ignore]
     public AppConnect App { get; set; }

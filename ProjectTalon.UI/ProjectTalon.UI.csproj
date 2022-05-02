@@ -29,4 +29,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ProjectTalon.Core\ProjectTalon.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\AuthorizeTransactionWindow.axaml.cs">
+      <DependentUpon>AuthorizeTransactionWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

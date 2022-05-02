@@ -1,5 +1,4 @@
-﻿using Blockfrost.Api.Services;
-using CardanoSharp.Koios.Sdk;
+﻿using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Wallet.Extensions;
 using CardanoSharp.Wallet.Models.Addresses;
 using CardanoSharp.Wallet.Models.Transactions;
@@ -22,15 +21,15 @@ namespace ProjectTalon.Core.Services
 
     public class TransactionService : ITransactionService
     {
-        private readonly ICardanoService _blockfrostService;
+        private readonly ITransactionClient _transactionClient;
         private readonly IEpochClient _epochClient;
         private readonly IAddressClient _addressClient;
         private readonly IAddressService _addressService;
 
 
-        public TransactionService(ICardanoService blockfrostService, IEpochClient epochClient, IAddressClient addressClient, IAddressService addressService)
+        public TransactionService(ITransactionClient transactionClient, IEpochClient epochClient, IAddressClient addressClient, IAddressService addressService)
         {
-            _blockfrostService = blockfrostService;
+            _transactionClient = transactionClient;
             _epochClient = epochClient;
             _addressClient = addressClient;
             _addressService = addressService;

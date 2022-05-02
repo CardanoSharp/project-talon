@@ -30,17 +30,20 @@ namespace ProjectTalon.UI.ViewModels
         private readonly ISettingsDatabase _settingsDatabase;
         
         public bool AuthAppWindowIsOpen { get; set; }
+        public bool AuthTransactionWindowIsOpen { get; set; }
         
         public ICommand CreateWalletCommand { get; }
         public ICommand ImportWalletCommand { get; }
         public ICommand ViewConnectionsCommand { get; }
         public ICommand ViewSettingsCommand { get; }
         public ICommand AuthorizeAppCommand { get; }
+        public ICommand AuthorizeTransactionCommand { get; }
         public Interaction<ImportWalletViewModel, ImportWalletWizardViewModel?> ImportWalletDialog { get; }
         public Interaction<CreateWalletViewModel, CreateWalletViewModel?> CreateWalletDialog { get; }
         public Interaction<ConnectionsViewModel, ViewConnectionsViewModel?> ViewConnectionsDialog { get; }
         public Interaction<SettingsViewModel, ManageSettingsViewModel?> ViewSettingsDialog { get; }
         public Interaction<AuthorizeAppViewModel, AuthorizeAppViewModel?> AuthorizeAppDialog { get; }
+        public Interaction<AuthorizeTransactionViewModel, AuthorizeTransactionViewModel?> AuthorizeTransactionDialog { get; }
 
         private int? _walletId;
         public int? WalletId
@@ -168,6 +171,21 @@ namespace ProjectTalon.UI.ViewModels
                     //do something
                 }
             });
+            
+            AuthorizeTransactionCommand = ReactiveCommand.CreateFromTask(async (TransactionRequest request) =>
+            {
+                var vm = new AuthorizeTransactionViewModel()
+                {
+                    //
+                };
+
+                var result = await AuthorizeTransactionDialog.Handle(vm);
+
+                if (result != null)
+                {
+                    //do something
+                }
+            });
 
             Task.Run(async () => await WalletExists());
             Task.Run(async () => await CheckPendingConnections());
@@ -189,6 +207,30 @@ namespace ProjectTalon.UI.ViewModels
                         await appConnectionDb.SaveAsync(connection);
 
                         await Dispatcher.UIThread.InvokeAsync(() => AuthorizeAppCommand.Execute(connection));
+                    }
+                }
+            }
+        }
+
+        private async Task CheckPendingTransactionRequests()
+        {
+            var transactionRequestDatabase = Locator.Current.GetService<ITransactionRequestDatabase>();
+
+            while (true)
+            {
+                if (!AuthTransactionWindowIsOpen)
+                {
+                    var transactionRequest = await transactionRequestDatabase.GetPendingAuthAsync();
+                    if (transactionRequest != null)
+                    {
+                        var appDatabase = Locator.Current.GetService<IAppConnectDatabase>();
+                        transactionRequest.App = await appDatabase.GetByAppIdAsync(transactionRequest.AppId);
+                        
+                        AuthTransactionWindowIsOpen = true;
+                        transactionRequest.HasReviewed = true;
+                        await transactionRequestDatabase.SaveAsync(transactionRequest);
+
+                        await Dispatcher.UIThread.InvokeAsync(() => AuthorizeTransactionCommand.Execute(transactionRequest));
                     }
                 }
             }

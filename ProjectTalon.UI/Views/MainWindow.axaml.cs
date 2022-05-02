@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -9,16 +8,11 @@ using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using Blockfrost.Api.Extensions;
 using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Wallet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
@@ -55,6 +49,7 @@ namespace ProjectTalon.UI.Views
             this.WhenActivated(d => d(ViewModel!.ViewConnectionsDialog.RegisterHandler(ShowConnectionsDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.ViewSettingsDialog.RegisterHandler(ShowSettingsDialogAsync)));
             this.WhenActivated(d => d(ViewModel!.AuthorizeAppDialog.RegisterHandler(ShowAuthorizeAppDialogAsync)));
+            this.WhenActivated(d => d(ViewModel!.AuthorizeTransactionDialog.RegisterHandler(ShowAuthorizeTransactionDialogAsync)));
             
             this.WhenActivated(d =>
             {
@@ -174,6 +169,19 @@ namespace ProjectTalon.UI.Views
             ViewModel.AuthAppWindowIsOpen = false;
         }
         
+        private async Task ShowAuthorizeTransactionDialogAsync(InteractionContext<AuthorizeTransactionViewModel, AuthorizeTransactionViewModel?> interaction)
+        {
+            var dialog = new AuthorizeTransactionWindow();
+            dialog.Width = 350;
+            dialog.Height = 600;
+            dialog.DataContext = interaction.Input;
+
+            var result = await dialog.ShowDialog<AuthorizeTransactionViewModel?>(this);
+            interaction.SetOutput(result);
+
+            ViewModel.AuthAppWindowIsOpen = false;
+        }
+        
         private void SetupWindow()
         {
             Width = 350;
@@ -220,8 +228,6 @@ namespace ProjectTalon.UI.Views
                     }
                 });
             });
-            
-            builder.Services.AddBlockfrost("testnet", "kL2vAF27FpfuzrnhSofc1JawdlL0BNkh");
 
             builder.Services.AddKoios("https://testnet.koios.rest/api/v0");
 

@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Blockfrost.Api;
-using Blockfrost.Api.Models;
-using Blockfrost.Api.Services;
-using Blockfrost.Api.Services.Extensions;
 using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Koios.Sdk.Contracts;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
