@@ -6,20 +6,16 @@ using CardanoSharp.Wallet.Models.Keys;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
-using ProjectTalon.Core.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using CardanoSharpAsset = CardanoSharp.Wallet.Models.Asset;
+using CardanoSharp.Wallet.Models;
+using Newtonsoft.Json;
 
 namespace ProjectTalon.Core.Services
 {
     public interface IAddressService
     {
-        Task<string?> GetWalletAddress(IWalletKeyDatabase keyDatabase, int? addressIndex = null);
-        Task<List<Asset>> GetUtxos(string address);
+        Task<string?> GetWalletAddress(int? addressIndex = null);
+        Task<List<Utxo>> GetUtxos(string address);
         Task AddWallet(string name, string recoveryPhrase, string spendingPassword);
     }
 
@@ -41,12 +37,13 @@ namespace ProjectTalon.Core.Services
             _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
         }
-        public async Task<string?> GetWalletAddress(IWalletKeyDatabase keyDatabase, int? addressIndex = null)
+        
+        public async Task<string?> GetWalletAddress(int? addressIndex = null)
         {
             addressIndex ??= 0;
 
-            var wallet = await keyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+            var wallet = await _walletKeyDatabase.GetWalletKeysAsync(1);
+            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.First().Vkey);
             if (publicKey is null)
                 throw new Exception("Wallet not found");
             var payment = publicKey
@@ -63,30 +60,42 @@ namespace ProjectTalon.Core.Services
             return address.ToString();
         }
 
-        public async Task<List<Asset>> GetUtxos(string address)
+        public async Task<List<Utxo>> GetUtxos(string address)
         {
             try
             {
-                var addressInfo = await _addressClient.GetAddressInformation(address);
-                var currentAssets = new List<Asset>()
-                {
-                    new Asset("lovelace", "", (ulong)addressInfo.Sum(x => Convert.ToInt64(x.Balance)))
-                };
+                var addressInfo = (await _addressClient.GetAddressInformation(address)).Content;
+                var utxos = new List<Utxo>();
 
-                foreach (var utxo in addressInfo.SelectMany(x => x.UtxoSets).SelectMany(x => x.AssetList))
+                foreach (var ai in addressInfo.SelectMany(x => x.UtxoSets))
                 {
-                    var asset = currentAssets.FirstOrDefault(x => x.PolicyId == utxo.PolicyId && x.AssetName == utxo.AssetName);
-                    if (asset is null)
+                    if(ai is null) continue;
+                    var utxo = new Utxo()
                     {
-                        asset = new Asset(utxo.PolicyId, utxo.AssetName, (ulong)Convert.ToInt64(utxo.Quantity));
-                    }
-                    else
+                        TxIndex = ai.TxIndex,
+                        TxHash = ai.TxHash,
+                        Balance = new Balance()
+                        {
+                            Lovelaces = ulong.Parse(ai.Value)
+                        }
+                    };
+
+                    var assetList = new List<CardanoSharpAsset>();
+                    foreach (var aa in ai.AssetList)
                     {
-                        asset.Quantity = asset.Quantity + (ulong)Convert.ToInt64(utxo.Quantity);
+                        assetList.Add(new CardanoSharpAsset()
+                        {
+                            Name = aa.AssetName,
+                            PolicyId = aa.PolicyId,
+                            Quantity = ulong.Parse(aa.Quantity)
+                        });
                     }
+
+                    utxo.Balance.Assets = assetList;
+                    utxos.Add(utxo);
                 }
 
-                return currentAssets;
+                return utxos;
             }
             catch (Exception ex)
             {
@@ -128,8 +137,8 @@ namespace ProjectTalon.Core.Services
             {
                 WalletId = newlyCreatedWallet.Id,
                 KeyType = (int)KeyType.Account,
-                Skey = JsonSerializer.Serialize(accountNode.PrivateKey.Encrypt(spendingPassword)),
-                Vkey = JsonSerializer.Serialize(accountNode.PublicKey),
+                Skey = JsonConvert.SerializeObject(accountNode.PrivateKey.Encrypt(spendingPassword)),
+                Vkey = JsonConvert.SerializeObject(accountNode.PublicKey),
                 KeyIndex = accountIx,
                 AccountIndex = accountIx
             });

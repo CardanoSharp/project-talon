@@ -56,7 +56,7 @@ public static class AddressesApi
             var response = Array.Empty<AddressInformation>();
             try
             {
-                if (address != null) response = await cardanoClient.GetAddressInformation(address);
+                if (address != null) response = (await cardanoClient.GetAddressInformation(address)).Content;
             }
             catch
             {

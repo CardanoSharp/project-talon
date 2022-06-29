@@ -61,7 +61,7 @@ public static class AccountsApi
             var response = Array.Empty<StakeReward>();
             try
             {
-                if (address != null) response = await cardanoClient.GetStakeRewards(address, epochNo, limit, offset);
+                if (address != null) response = (await cardanoClient.GetStakeRewards(address, epochNo, limit, offset)).Content;
             }
             catch
             {
@@ -90,7 +90,7 @@ public static class AccountsApi
             var response = Array.Empty<StakeHistory>();
             try
             {
-                if (address != null) response = await cardanoClient.GetStakeHistory(address, limit, offset);
+                if (address != null) response = (await cardanoClient.GetStakeHistory(address, limit, offset)).Content;
             }
             catch
             {
@@ -119,7 +119,7 @@ public static class AccountsApi
             var response = Array.Empty<StakeUpdate>();
             try
             {
-                if (address != null) response = await cardanoClient.GetStakeUpdates(address, limit, offset);
+                if (address != null) response = (await cardanoClient.GetStakeUpdates(address, limit, offset)).Content;
             }
             catch
             {
@@ -148,7 +148,7 @@ public static class AccountsApi
             var response = Array.Empty<StakeAddress>();
             try
             {
-                if (address != null) response = await cardanoClient.GetStakeAddresses(address, limit, offset);
+                if (address != null) response = (await cardanoClient.GetStakeAddresses(address, limit, offset)).Content;
             }
             catch
             {
@@ -177,7 +177,7 @@ public static class AccountsApi
             var response = Array.Empty<StakeAsset>();
             try
             {
-                if (address != null) response = await cardanoClient.GetStakeAssets(address, limit, offset);
+                if (address != null) response = (await cardanoClient.GetStakeAssets(address, limit: limit, offset: offset)).Content;
             }
             catch
             {

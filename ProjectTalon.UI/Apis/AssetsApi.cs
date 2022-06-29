@@ -28,7 +28,7 @@ public class AssetsApi
             var response = Array.Empty<AssetAddress>();
             try
             {
-                response = await cardanoClient.GetAddresses(policyId, assetName, limit, offset);
+                response = (await cardanoClient.GetAddresses(policyId, assetName, limit, offset)).Content;
             }
             catch
             {
@@ -55,7 +55,7 @@ public class AssetsApi
             var response = Array.Empty<AssetInformation>();
             try
             {
-                response = await cardanoClient.GetInfo(policyId, assetName, limit, offset);
+                response = (await cardanoClient.GetInfo(policyId, assetName, limit, offset)).Content;
             }
             catch
             {
@@ -82,7 +82,7 @@ public class AssetsApi
             var response = Array.Empty<AssetTransaction>();
             try
             {
-                response = await cardanoClient.GetTransactions(policyId, assetName, limit, offset);
+                response = (await cardanoClient.GetTransactions(policyId, assetName, limit, offset)).Content;
             }
             catch
             {

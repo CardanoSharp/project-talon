@@ -119,17 +119,12 @@ public class CreateWalletViewModel: ViewModelBase
         ExitWizard.Execute(null);
     }
     
-    private async Task NameAndSecurePrevious(CancellationToken arg)
-    {
+    private async Task NameAndSecurePrevious(CancellationToken arg) =>
         SetActiveView(CreateWizardSteps.EnterMnemonic);
-    }
+    
 
-    private async Task EnterMnemonicNext(CancellationToken arg)
-    {
-        
-        
+    private async Task EnterMnemonicNext(CancellationToken arg) =>
         SetActiveView(CreateWizardSteps.NameAndSecure);
-    }
     
     private async Task EnterMnemonicPrevious(CancellationToken arg)
     {

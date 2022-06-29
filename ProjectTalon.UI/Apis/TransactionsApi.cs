@@ -94,7 +94,7 @@ public class TransactionsApi
             var response = Array.Empty<Transaction>();
             try
             {
-                response = await cardanoClient.GetTransactionInformation(request, limit, offset);
+                response = (await cardanoClient.GetTransactionInformation(request, limit, offset)).Content;
             }
             catch
             {
@@ -120,7 +120,7 @@ public class TransactionsApi
             var response = Array.Empty<Transaction>();
             try
             {
-                response = await cardanoClient.GetTransactionUtxos(request, limit, offset);
+                response = (await cardanoClient.GetTransactionUtxos(request, limit, offset)).Content;
             }
             catch
             {
@@ -146,7 +146,7 @@ public class TransactionsApi
             var response = Array.Empty<TransactionMetadata>();
             try
             {
-                response = await cardanoClient.GetTransactionMetadata(request, limit, offset);
+                response = (await cardanoClient.GetTransactionMetadata(request, limit, offset)).Content;
             }
             catch
             {

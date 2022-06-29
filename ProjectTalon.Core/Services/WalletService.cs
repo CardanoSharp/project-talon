@@ -13,13 +13,11 @@ namespace ProjectTalon.Core.Services
 {
     public interface IWalletService
     {
-
         Task AddWallet(string name, string recoveryPhrase, string spendingPassword);
     }
 
     public class WalletService : IWalletService
     {
-        private readonly SQLiteAsyncConnection database;
         private IMnemonicService _mnemonicService;
         private IWalletDatabase _walletDatabase;
         private IWalletKeyDatabase _walletKeyDatabase;
