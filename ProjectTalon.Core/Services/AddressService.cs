@@ -15,6 +15,7 @@ namespace ProjectTalon.Core.Services
     public interface IAddressService
     {
         Task<string?> GetWalletAddress(int? addressIndex = null);
+        Task<string?> GetChangeAddress(int? addressIndex = null);
         Task<List<Utxo>> GetUtxos(string address);
         Task AddWallet(string name, string recoveryPhrase, string spendingPassword);
     }
@@ -34,7 +35,6 @@ namespace ProjectTalon.Core.Services
         {
             _addressClient = addressClient;
             _mnemonicService = mnemonicService;
-            _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
         }
         
@@ -42,12 +42,34 @@ namespace ProjectTalon.Core.Services
         {
             addressIndex ??= 0;
 
-            var wallet = await _walletKeyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.First().Vkey);
+            var wallet = await _walletKeyDatabase.GetFirstAsync();
+            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.Vkey);
             if (publicKey is null)
                 throw new Exception("Wallet not found");
             var payment = publicKey
                 .Derive(RoleType.ExternalChain)
+                .Derive((int)addressIndex);
+
+            var stake = publicKey
+                .Derive(RoleType.Staking)
+                .Derive(0);
+
+            var address = new CardanoSharp.Wallet.AddressService()
+                .GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet);
+
+            return address.ToString();
+        }
+        
+        public async Task<string?> GetChangeAddress(int? addressIndex = null)
+        {
+            addressIndex ??= 0;
+
+            var wallet = await _walletKeyDatabase.GetFirstAsync();
+            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.Vkey);
+            if (publicKey is null)
+                throw new Exception("Wallet not found");
+            var payment = publicKey
+                .Derive(RoleType.InternalChain)
                 .Derive((int)addressIndex);
 
             var stake = publicKey
@@ -64,7 +86,8 @@ namespace ProjectTalon.Core.Services
         {
             try
             {
-                var addressInfo = (await _addressClient.GetAddressInformation(address)).Content;
+                var addressResponse = (await _addressClient.GetAddressInformation(address));
+                var addressInfo = addressResponse.Content;
                 var utxos = new List<Utxo>();
 
                 foreach (var ai in addressInfo.SelectMany(x => x.UtxoSets))

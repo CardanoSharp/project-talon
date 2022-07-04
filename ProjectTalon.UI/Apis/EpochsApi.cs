@@ -25,7 +25,7 @@ public class EpochsApi
     {
         try
         {
-            return Results.Ok(await cardanoClient.GetEpochInformation(epochNo, limit, offset));
+            return Results.Ok((await cardanoClient.GetEpochInformation(epochNo, limit, offset)).Content);
         }
         catch (Exception e)
         {
@@ -41,7 +41,7 @@ public class EpochsApi
     {
         try
         {
-            return Results.Ok(await cardanoClient.GetProtocolParameters(epochNo, limit, offset));
+            return Results.Ok((await cardanoClient.GetProtocolParameters(epochNo, limit, offset)).Content);
         }
         catch (Exception e)
         {

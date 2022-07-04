@@ -194,8 +194,8 @@ public static class AccountsApi
 
     private static async Task<string?> GetStakeAddress(IWalletKeyDatabase keyDatabase)
     {
-        var wallet = await keyDatabase.GetWalletKeysAsync(1);
-        var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+        var wallet = await keyDatabase.GetFirstAsync();
+        var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.Vkey);
         if (publicKey is null)
             throw new Exception("Wallet not found");
 

@@ -11,6 +11,7 @@ namespace ProjectTalon.UI.Views;
 
 public partial class AuthorizeTransactionWindow : ReactiveWindow<AuthorizeTransactionViewModel>
 {
+    private TextBox word1 => this.FindControl<TextBox>("Password");
     public AuthorizeTransactionWindow()
     {
         InitializeComponent();
@@ -20,8 +21,18 @@ public partial class AuthorizeTransactionWindow : ReactiveWindow<AuthorizeTransa
 
         this.WhenActivated(d =>
         {
+            word1.PropertyChanged += TextChanged;
             ViewModel.CloseWindowCommand = ReactiveCommand.CreateFromTask(CloseWindow);
         });
+    }    
+    
+    private void TextChanged(object? sender, AvaloniaPropertyChangedEventArgs args)
+    {
+        if(sender is TextBox)
+        {
+            var box = (TextBox) sender;
+            ViewModel.UpdatePassword(box.Text);
+        }
     }
     
     private async Task CloseWindow(CancellationToken arg)

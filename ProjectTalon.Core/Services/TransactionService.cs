@@ -27,7 +27,7 @@ namespace ProjectTalon.Core.Services
 {
     public interface ITransactionService
     {
-        Task<string> SubmitTransactionAsync(TransactionRequest transactionRequest);
+        Task<string> SubmitTransactionAsync(TransactionRequest transactionRequest, string password);
     }
 
     public class TransactionService : ITransactionService
@@ -55,15 +55,20 @@ namespace ProjectTalon.Core.Services
             _walletKeyDatabase = walletKeyDatabase;
         }
 
-        public async Task<string> SubmitTransactionAsync(TransactionRequest transactionRequest)
+        public async Task<string> SubmitTransactionAsync(TransactionRequest transactionRequest, string password)
         {
             //0. Get Address
-            var (payment, stake) = await GetPaymentAndStakeKeys();
+            var (payment, stake) = await GetPaymentAndStakeKeys(password, RoleType.ExternalChain);
+            var (change, _) = await GetPaymentAndStakeKeys(password, RoleType.InternalChain);
             var address = new CardanoSharp.Wallet.AddressService()
                 .GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet);
+            var changeAddress = new CardanoSharp.Wallet.AddressService()
+                .GetBaseAddress(change.PublicKey, stake.PublicKey, NetworkType.Testnet);
             
             //1. Get UTxOs
             var utxos = await _addressService.GetUtxos(address.ToString());
+            var changeUtxos = await _addressService.GetUtxos(changeAddress.ToString());
+            utxos.AddRange(changeUtxos);
             if (utxos is null)
                 return null;
     
@@ -80,12 +85,16 @@ namespace ProjectTalon.Core.Services
             AddInputsFromCoinSelection(coinSelection, transactionBody);
             
             //if we have change from coin selection, add to outputs
-            if(coinSelection.ChangeOutputs is not null && coinSelection.ChangeOutputs.Any())
-                AddChangeOutputs(transactionBody, coinSelection.ChangeOutputs);
+            if (coinSelection.ChangeOutputs is not null && coinSelection.ChangeOutputs.Any())
+            {
+                AddChangeOutputs(transactionBody, coinSelection.ChangeOutputs, changeAddress.ToString());
+            }
 
             //get protocol parameters and set default fee
-            var protocolParameters = (await _epochClient.GetProtocolParameters()).Content.FirstOrDefault();
-            transactionBody.SetFee(protocolParameters.MinFeeB);
+            var epochResponse = await _epochClient.GetEpochInformation();
+            var ppResponse = await _epochClient.GetProtocolParameters();
+            var protocolParameters = ppResponse.Content.FirstOrDefault();
+            transactionBody.SetFee(protocolParameters.MinFeeB.Value);
 
             //get network tip and set ttl
             var blockSummaries = (await _networkClient.GetChainTip()).Content;
@@ -94,18 +103,23 @@ namespace ProjectTalon.Core.Services
             
             ///3. Add Metadata
             IAuxiliaryDataBuilder auxData = null;
-            var metadatas = JsonConvert.DeserializeObject<Dictionary<int, object>>(
-                (JsonConvert.DeserializeObject<Dictionary<string, object>>(transactionRequest.Parameters))["Metadata"].ToString());
-            foreach(var metadata in metadatas)
+            var metadataRequest =
+                JsonConvert.DeserializeObject<Dictionary<string, object>>(transactionRequest.Parameters)["Metadata"];
+            if (metadataRequest is not null)
             {
-                if(auxData is null) auxData = AuxiliaryDataBuilder.Create;
-                ;
-                auxData.AddMetadata(metadata.Key, metadata.Value);
+                var metadatas = JsonConvert.DeserializeObject<Dictionary<int, object>>(metadataRequest.ToString());
+                foreach (var metadata in metadatas)
+                {
+                    if (auxData is null) auxData = AuxiliaryDataBuilder.Create;
+                    ;
+                    auxData.AddMetadata(metadata.Key, metadata.Value);
+                }
             }
 
             ///4. Add Witnesses
             var witnessSet = TransactionWitnessSetBuilder.Create;
             witnessSet.AddVKeyWitness(payment.PublicKey, payment.PrivateKey);
+            witnessSet.AddVKeyWitness(change.PublicKey, change.PrivateKey);
 
             ///5. Build Draft TX
             //create transaction builder and add the pieces
@@ -117,7 +131,7 @@ namespace ProjectTalon.Core.Services
 
             //get a draft transaction to calculate fee
             var draft = transaction.Build(); 
-            var fee = draft.CalculateFee(protocolParameters.MinFeeA, protocolParameters.MinFeeA);
+            var fee = draft.CalculateFee(protocolParameters.MinFeeA, protocolParameters.MinFeeB);
             
             //update fee and change output
             transactionBody.SetFee(fee);
@@ -130,7 +144,8 @@ namespace ProjectTalon.Core.Services
             using (MemoryStream stream = new MemoryStream(signed))
                 try
                 {
-                    return (await _transactionClient.Submit(stream)).Content;
+                    var result = (await _transactionClient.Submit(stream));
+                    return result.Content;
                 }
                 catch (Exception e)
                 {
@@ -138,20 +153,21 @@ namespace ProjectTalon.Core.Services
                 }
         }
 
-        private async Task<(IIndexNodeDerivation payment, IIndexNodeDerivation stake)> GetPaymentAndStakeKeys()
+        private async Task<(IIndexNodeDerivation payment, IIndexNodeDerivation stake)> GetPaymentAndStakeKeys(string password, RoleType roleType)
         {
-            var wallet = await _walletKeyDatabase.GetWalletKeysAsync(1);
-            var privateKey = JsonConvert.DeserializeObject<PrivateKey>(wallet.First().Skey);
-            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.First().Vkey);
-            if (publicKey is null)
+            var wallet = await _walletKeyDatabase.GetFirstAsync();
+            var privateKey = JsonConvert.DeserializeObject<PrivateKey>(wallet.Skey).Decrypt(password);
+            if (privateKey is null)
                 throw new Exception("Wallet not found");
             var payment = privateKey
-                .Derive(RoleType.ExternalChain)
+                .Derive(roleType)
                 .Derive(0);
+            payment.SetPublicKey();
 
             var stake = privateKey
                 .Derive(RoleType.Staking)
                 .Derive(0);
+            stake.SetPublicKey();
             return (payment, stake);
         }
 
@@ -188,20 +204,25 @@ namespace ProjectTalon.Core.Services
             }
         }
 
-        private void AddChangeOutputs(ITransactionBodyBuilder ttb, List<TransactionOutput> outputs)
+        private void AddChangeOutputs(ITransactionBodyBuilder ttb, List<TransactionOutput> outputs, string address)
         {
             foreach (var output in outputs)
             {
-                var assetList = TokenBundleBuilder.Create;
-                foreach (var ma in output.Value.MultiAsset)
+                ITokenBundleBuilder? assetList = null;
+
+                if (output.Value.MultiAsset is not null)
                 {
-                    foreach (var na in ma.Value.Token)
+                    assetList = TokenBundleBuilder.Create;
+                    foreach (var ma in output.Value.MultiAsset)
                     {
-                        assetList.AddToken(ma.Key, na.Key, na.Value);
+                        foreach (var na in ma.Value.Token)
+                        {
+                            assetList.AddToken(ma.Key, na.Key, na.Value);
+                        }
                     }
                 }
 
-                ttb.AddOutput(output.Address, output.Value.Coin, assetList);
+                ttb.AddOutput(new Address(address), output.Value.Coin, assetList);
             }
         }
     }

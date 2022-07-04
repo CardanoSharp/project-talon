@@ -8,9 +8,11 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CardanoSharp.Koios.Sdk;
 using CardanoSharp.Wallet;
 using ProjectTalon.Core.Data;
-using ProjectTalon.UI.ViewModels;
+using ProjectTalon.Core.Services;
+using Refit;
 using Splat;
 using WalletService = ProjectTalon.Core.Services.WalletService;
 
@@ -46,12 +48,37 @@ namespace ProjectTalon.UI
             services.Register<IAppConnectDatabase>(() => new AppConnectDatabase());
             services.Register<ITransactionRequestDatabase>(() => new TransactionRequestDatabase());
             services.Register<ISettingsDatabase>(() => new SettingsDatabase());
+            
+            services.Register(
+                () => RestService.For<IEpochClient>("https://testnet.koios.rest/api/v0"));
+            services.Register(
+                () => RestService.For<INetworkClient>("https://testnet.koios.rest/api/v0"));
+            services.Register(
+                () => RestService.For<ITransactionClient>("https://testnet.koios.rest/api/v0"));
+            services.Register(
+                () => RestService.For<IAddressClient>("https://testnet.koios.rest/api/v0"));
 
             services.Register<Core.Services.IWalletService>(() => new WalletService(
                 new MnemonicService(),
                 resolver.GetService<IWalletKeyDatabase>(),
                 resolver.GetService<IWalletDatabase>()
-                ));
+            ));
+            
+            services.Register<Core.Services.IAddressService>(() => new Core.Services.AddressService(
+                resolver.GetService<IAddressClient>(),
+                new MnemonicService(),
+                resolver.GetService<IWalletDatabase>(),
+                resolver.GetService<IWalletKeyDatabase>()
+            ));
+
+            services.Register<ITransactionService>(() => new TransactionService(
+                resolver.GetService<ITransactionClient>(),
+                resolver.GetService<IEpochClient>(),
+                resolver.GetService<IAddressClient>(),
+                resolver.GetService<Core.Services.IAddressService>(),
+                resolver.GetService<INetworkClient>(),
+                resolver.GetService<IWalletKeyDatabase>()
+            ));
         }
     }
 }

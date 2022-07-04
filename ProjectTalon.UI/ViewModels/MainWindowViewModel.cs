@@ -9,17 +9,19 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Threading;
-using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
 using CardanoSharp.Wallet.Models.Keys;
 using DynamicData;
 using Microsoft.AspNetCore.Components.Web;
+using Newtonsoft.Json;
 using ProjectTalon.Core.Common;
 using ReactiveUI;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
+using ProjectTalon.Core.Services;
 using Splat;
+using AddressService = CardanoSharp.Wallet.AddressService;
 
 namespace ProjectTalon.UI.ViewModels
 {
@@ -121,6 +123,7 @@ namespace ProjectTalon.UI.ViewModels
             ViewConnectionsDialog = new Interaction<ConnectionsViewModel, ViewConnectionsViewModel?>();
             ViewSettingsDialog = new Interaction<SettingsViewModel, ManageSettingsViewModel?>();
             AuthorizeAppDialog = new Interaction<AuthorizeAppViewModel, AuthorizeAppViewModel?>();
+            AuthorizeTransactionDialog = new Interaction<AuthorizeTransactionViewModel, AuthorizeTransactionViewModel?>();
             
             ImportWalletCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -174,9 +177,9 @@ namespace ProjectTalon.UI.ViewModels
             
             AuthorizeTransactionCommand = ReactiveCommand.CreateFromTask(async (TransactionRequest request) =>
             {
-                var vm = new AuthorizeTransactionViewModel()
-                {
-                    //
+                var vm = new AuthorizeTransactionViewModel(Locator.Current.GetService<ITransactionService>())
+                { 
+                    TransactionRequest = request
                 };
 
                 var result = await AuthorizeTransactionDialog.Handle(vm);
@@ -189,6 +192,7 @@ namespace ProjectTalon.UI.ViewModels
 
             Task.Run(async () => await WalletExists());
             Task.Run(async () => await CheckPendingConnections());
+            Task.Run(async () => await CheckPendingTransactionRequests());
         }
 
         private async Task CheckPendingConnections()
@@ -243,8 +247,8 @@ namespace ProjectTalon.UI.ViewModels
         
         private async Task<string> GetWalletAddress()
         {
-            var wallet = await _walletKeyDatabase.GetWalletKeysAsync(1);
-            var publicKey = JsonSerializer.Deserialize<PublicKey>(wallet.First().Vkey);
+            var wallet = await _walletKeyDatabase.GetFirstAsync();
+            var publicKey = JsonConvert.DeserializeObject<PublicKey>(wallet.Vkey);
             if (publicKey is null)
                 throw new Exception("Wallet not found");
             var payment = publicKey

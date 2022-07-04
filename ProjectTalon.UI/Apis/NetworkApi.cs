@@ -20,7 +20,7 @@ public class NetworkApi
     {
         try
         {
-            return Results.Ok(await cardanoClient.GetChainTip());
+            return Results.Ok((await cardanoClient.GetChainTip()).Content);
         }
         catch (Exception e)
         {

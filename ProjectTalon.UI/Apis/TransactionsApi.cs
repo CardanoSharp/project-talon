@@ -68,7 +68,7 @@ public class TransactionsApi
                 Parameters = JsonConvert.SerializeObject(new
                 {
                     request.Outputs,
-                    request.Metadata
+                    Metadata = request.Metadata.ToString()
                 }),
                 ReferenceId = referenceId
             };

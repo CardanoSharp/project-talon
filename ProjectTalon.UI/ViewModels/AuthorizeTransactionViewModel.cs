@@ -5,6 +5,7 @@ using CardanoSharp.Wallet.Models.Transactions;
 using ProjectTalon.Core.Common;
 using ProjectTalon.Core.Data;
 using ProjectTalon.Core.Data.Models;
+using ProjectTalon.Core.Services;
 using ReactiveUI;
 using Splat;
 
@@ -17,8 +18,20 @@ public class AuthorizeTransactionViewModel: ViewModelBase
     public ICommand DenyAppCommand { get; }
     public ICommand CloseWindowCommand { get; set; }
 
-    public AuthorizeTransactionViewModel()
+    private readonly ITransactionService _transactionService;
+
+    private string _password;
+    private bool _hasPassword;
+    public bool HasPassword
     {
+        get => _hasPassword;
+        set => this.RaiseAndSetIfChanged(ref _hasPassword, value);
+    }
+    
+
+    public AuthorizeTransactionViewModel(ITransactionService transactionService)
+    {
+        _transactionService = transactionService;
         ApproveAppCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             await SubmitTransaction();
@@ -32,9 +45,30 @@ public class AuthorizeTransactionViewModel: ViewModelBase
         });
     }
 
+    public void UpdatePassword(string enteredPassword)
+    {
+        HasPassword = !string.IsNullOrEmpty(enteredPassword);
+        _password = enteredPassword;
+    }
+
     private async Task SubmitTransaction()
     {
+        var txHash = await _transactionService.SubmitTransactionAsync(TransactionRequest, _password);
         
+        var transactionRequestDb = Locator.Current.GetService<ITransactionRequestDatabase>();
+        
+        var transactionRequest = await transactionRequestDb.GetAsync(TransactionRequest.Id);
+        if (!string.IsNullOrEmpty(txHash))
+        {
+            transactionRequest.StatusId = (int) TransactionRequestStatus.Submitted;
+            transactionRequest.TransactionHash = txHash;
+        }
+        else
+        {
+            transactionRequest.StatusId = (int) TransactionRequestStatus.Rejected;
+        }
+
+        await transactionRequestDb.SaveAsync(transactionRequest);
     }
 
     private async Task RejectTransaction()

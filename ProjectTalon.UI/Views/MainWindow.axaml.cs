@@ -177,7 +177,7 @@ namespace ProjectTalon.UI.Views
             var result = await dialog.ShowDialog<AuthorizeTransactionViewModel?>(this);
             interaction.SetOutput(result);
 
-            ViewModel.AuthAppWindowIsOpen = false;
+            ViewModel.AuthTransactionWindowIsOpen = false;
         }
         
         private void SetupWindow()

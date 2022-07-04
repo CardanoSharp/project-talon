@@ -8,6 +8,8 @@ namespace ProjectTalon.Core.Data
         Task<WalletKey> GetWalletKeyAsync(int id);
         Task<int> SaveWalletAsync(WalletKey walletKey);
         Task<int> DeleteWalletAsync(WalletKey walletKey);
+
+        Task<WalletKey> GetFirstAsync();
     }
 
     public class WalletKeyDatabase : BaseDatabase, IWalletKeyDatabase
@@ -51,6 +53,12 @@ namespace ProjectTalon.Core.Data
         {
             // Delete a wallet.
             return await database.DeleteAsync(walletKey);
+        }
+
+        public async Task<WalletKey> GetFirstAsync()
+        {
+            return await database.Table<WalletKey>()
+                .FirstOrDefaultAsync();
         }
     }
 }
