@@ -1,0 +1,36 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ProjectTalon.UI.ViewModels"
+             xmlns:oxy="clr-namespace:OxyPlot.Avalonia;assembly=OxyPlot.Avalonia" 
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProjectTalon.UI.Views.DashboardView">
+
+    <Design.DataContext>
+        <vm:DashboardViewModel/>
+    </Design.DataContext>
+    
+        <!-- <ListBox Items="{Binding WalletSummaries}" Name="WalletSummaryList" Background="yellow" > -->
+        <!--     <ItemsControl.ItemTemplate> -->
+        <!--         <DataTemplate> -->
+        <!--             <Label Content="{Binding Wallet.Name}" /> -->
+        <!--         </DataTemplate> -->
+        <!--     </ItemsControl.ItemTemplate> -->
+        <!-- </ListBox> -->
+        
+        <DockPanel>
+            <oxy:Plot Title="LinearBarSeries">
+                <oxy:Plot.Annotations>
+                    <oxy:LineAnnotation Type="Horizontal" Y="0"></oxy:LineAnnotation>
+                </oxy:Plot.Annotations>
+                <oxy:Plot.Axes>
+                    <oxy:DateTimeAxis IntervalType="Hours" IntervalLength="50"/>
+                </oxy:Plot.Axes>
+                <oxy:Plot.Series>
+                    <oxy:LinearBarSeries Items="{Binding Pnls}" Title="P&amp;L" DataFieldX="Time" DataFieldY="Value" FillColor="#454CAF50" StrokeColor="#4CAF50" StrokeThickness="1" BarWidth="5"/>
+                </oxy:Plot.Series>
+            </oxy:Plot>
+        </DockPanel>
+   
+</UserControl>

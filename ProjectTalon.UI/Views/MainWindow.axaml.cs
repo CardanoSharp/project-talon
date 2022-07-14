@@ -31,9 +31,6 @@ namespace ProjectTalon.UI.Views
     {
         private Thread apiThread;
         private WebApplication? api;
-        
-        private int paddingRight = 20;
-        private int paddingBottom = 85;
 
         public MainWindow()
         {
@@ -62,7 +59,6 @@ namespace ProjectTalon.UI.Views
                     .DisposeWith(d);
             });
             
-            SetupWindow();
             ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.OSXThickTitleBar;
 
             Task.Run(async () => await InitializeSettings());
@@ -170,30 +166,12 @@ namespace ProjectTalon.UI.Views
         private async Task ShowAuthorizeTransactionDialogAsync(InteractionContext<AuthorizeTransactionViewModel, AuthorizeTransactionViewModel?> interaction)
         {
             var dialog = new AuthorizeTransactionWindow();
-            dialog.Width = 350;
-            dialog.Height = 600;
             dialog.DataContext = interaction.Input;
 
             var result = await dialog.ShowDialog<AuthorizeTransactionViewModel?>(this);
             interaction.SetOutput(result);
 
             ViewModel.AuthTransactionWindowIsOpen = false;
-        }
-        
-        private void SetupWindow()
-        {
-            Width = 350;
-            Height = 600;
-            CanResize = false;
-
-            var window = this.GetSelfAndLogicalAncestors().OfType<Window>().First();
-
-            var screen = window.Screens.ScreenFromPoint(Position);
-
-            var newX = screen.Bounds.Width - paddingRight - 350;
-            var newY = screen.Bounds.Height - paddingBottom - 600;
-
-            Position = new PixelPoint(newX, newY);
         }
 
         private void InitializeComponent()
