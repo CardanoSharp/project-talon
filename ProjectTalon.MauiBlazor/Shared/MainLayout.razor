@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+	<main>
+		<div class="top-row px-4">
+			<div class="nav-link">
+				<span style="">Talon</span>
+			</div>
+			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+				Home
+			</NavLink>
+			<NavLink class="nav-link" href="addwallet">
+				Add Wallet
+			</NavLink>
+			<NavLink class="nav-link" href="fetchdata">
+				Settings
+			</NavLink>
+		</div>
+
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
+</div>

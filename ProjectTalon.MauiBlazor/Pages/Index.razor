@@ -1,0 +1,209 @@
+﻿@page "/"
+@using CardanoSharp.Koios.Sdk
+@using CardanoSharp.Koios.Sdk.Contracts
+@using CardanoSharp.Wallet
+@using CardanoSharp.Wallet.Enums
+@using CardanoSharp.Wallet.Extensions
+@using CardanoSharp.Wallet.Models
+@using CardanoSharp.Wallet.Models.Keys
+@using CardanoSharp.Wallet.Extensions.Models
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.PieChart
+@using ChartJs.Blazor.Util
+@using Newtonsoft.Json
+@using ProjectTalon.Core.Common
+@using ProjectTalon.Core.Data
+@using ProjectTalon.Core.Data.Models
+
+@inject IWalletDatabase walletDatabase
+@inject IWalletKeyDatabase walletKeyDatabase
+@inject IAccountClient accountClient
+@inject IAddressClient addressClient
+
+<div class="row">
+    <div class="col-12">
+        <h2>Wallet Summaries</h2>
+    </div>
+
+    <div class="col-6">
+        <Chart Config="_config"></Chart>
+    </div>
+
+    <div class="col-6">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Wallet</th>
+                    <th scope="col">ADA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ws in wallets)
+                {
+                    <tr>
+                        <td>@ws.Name</td>
+                        <td>@ws.Ada</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>Transactions</h2>
+    </div>
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Wallet</th>
+                    <th scope="col">Tx Hash</th>
+                    <th scope="col">Block</th>
+                    <th scope="col">ADA</th>
+                    <th scope="col">Has Assets</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tx in transactions.OrderByDescending(x => x.BlockHeight))
+                {
+                    <tr>
+                        <td>@tx.WalletName</td>
+                        <td>@tx.TransactionHash</td>
+                        <td>@tx.BlockHeight</td>
+                        <td>@tx.Ada</td>
+                        <td>@tx.HasAssets.ToString().ToUpper()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    public record WalletSummary(string Name, decimal Ada);
+    public record TransactionSummary(string WalletName, string TransactionHash, string BlockHeight, decimal Ada, bool HasAssets);
+    private PieConfig _config;
+    private List<WalletSummary> wallets = new List<WalletSummary>();
+    private List<TransactionSummary> transactions = new List<TransactionSummary>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        _config = new PieConfig
+            {
+                Options = new PieOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = "Wallet Summary"
+                    }
+                }
+            };
+        await LoadDash();
+    }
+
+    private async Task LoadDash() {
+        wallets.Clear();
+        transactions.Clear();
+        var dbWallets = await GetWallets();
+
+        PieDataset<decimal> dataset = new PieDataset<decimal>();
+        List<string> backgroundColors = new List<string>();
+        foreach (var wallet in dbWallets)
+        {
+            _config.Data.Labels.Add(wallet.Name);
+            decimal lovelaces = wallet.AddressInformation.Sum(x => decimal.Parse(x.Balance));
+            decimal ada = lovelaces / 1000000.000m;
+            dataset.Add(ada);
+            wallets.Add(new WalletSummary(wallet.Name, ada));
+
+            foreach(var utxo in wallet.AddressInformation.Select(x => x.UtxoSets)){
+                foreach (var tx in utxo) {
+                    transactions.Add(new TransactionSummary(wallet.Name, tx.TxHash, tx.BlockHeight.ToString(), (long.Parse(tx.Value) / 1000000.000m), tx.AssetList.Any()));
+                }
+            }
+
+            Random rnd = new Random();
+            byte r = Convert.ToByte(rnd.Next(256));
+            byte g = Convert.ToByte(rnd.Next(256));
+            byte b = Convert.ToByte(rnd.Next(256));
+            backgroundColors.Add(ColorUtil.ColorHexString(r, g, b));
+        }
+
+        dataset.BackgroundColor = backgroundColors.ToArray();
+        _config.Data.Datasets.Add(dataset);
+    }
+
+    private async Task<List<Wallet>> GetWallets()
+    {
+        var wallets = await walletDatabase.ListAsync();
+
+        foreach(var wallet in wallets) {
+            wallet.AddressInformation = new List<AddressInformation>();
+            wallet.Keys = await walletKeyDatabase.GetWalletKeysAsync(wallet.Id);
+            await GetBalance(wallet);
+        }
+
+        return wallets;
+    }
+
+    public async Task GetBalance(Wallet wallet) 
+    {
+        string bechAddress = string.Empty;
+        StakeAddress[] addresses;
+        switch(wallet.WalletType)
+        {
+            case (int)WalletType.HD:
+                var walletKey = wallet.Keys.FirstOrDefault();
+                if (walletKey is null)
+                    throw new Exception("Keys not found");
+
+                var publicKey = JsonConvert.DeserializeObject<PublicKey>(walletKey.Vkey);
+                if (publicKey is null)
+                    throw new Exception("Wallet not found");
+
+                var payment = publicKey
+                    .Derive(RoleType.ExternalChain)
+                    .Derive(0);
+
+                var stake = publicKey
+                    .Derive(RoleType.Staking)
+                    .Derive(0);
+
+                bechAddress = new AddressService().GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet).ToString();
+                var addressesResponse = await accountClient.GetStakeAddresses(bechAddress);
+                if (addressesResponse.Error is not null)
+                    throw new Exception(addressesResponse.Error.Message);
+
+                addresses = addressesResponse.Content;
+
+                break;
+            case (int)WalletType.KeyPair:
+                var paymentKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.External).Vkey;
+                var paymentKey = new PublicKey(paymentKeyStr.HexToByteArray(), null);
+                var stakeKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.Staking).Vkey;
+                var stakeKey = new PublicKey(stakeKeyStr.HexToByteArray(), null);
+
+                bechAddress = new AddressService().GetBaseAddress(paymentKey, stakeKey, NetworkType.Testnet).ToString();
+
+                addresses = new StakeAddress[1]{
+                    new StakeAddress() {
+                        Address = bechAddress
+                    }
+            };
+                break;
+            default:
+                throw new Exception("Unknown wallet type.");
+        }
+
+        
+        foreach(var address in addresses)
+        {
+            var addrBalanceResponse = await addressClient.GetAddressInformation(address.Address);
+            wallet.AddressInformation.AddRange(addrBalanceResponse.Content);
+        }
+    }
+}

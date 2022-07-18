@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardanoSharp.Wallet", "D:\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardanoSharp.Koios.Sdk", "D:\CardanoSharp\cardanosharp-koios\CardanoSharp.Koios.Sdk\CardanoSharp.Koios.Sdk.csproj", "{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectTalon.Maui", "ProjectTalon.Maui\ProjectTalon.Maui.csproj", "{ED0369CD-CE3A-4992-86C0-82909F4249B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.MauiBlazor", "ProjectTalon.MauiBlazor\ProjectTalon.MauiBlazor.csproj", "{305D839D-9575-47A3-A302-605C7B06CF2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,18 +53,18 @@ Global
 		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|x64.ActiveCfg = Release|Any CPU
 		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|x64.Build.0 = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|x64.Build.0 = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Debug|x64.Deploy.0 = Debug|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|x64.ActiveCfg = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|x64.Build.0 = Release|Any CPU
-		{ED0369CD-CE3A-4992-86C0-82909F4249B5}.Release|x64.Deploy.0 = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.Build.0 = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.Deploy.0 = Debug|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.ActiveCfg = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.Build.0 = Release|Any CPU
+		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
