@@ -1,18 +1,22 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
+	<div class="sidebar">
+		<NavMenu />
+	</div>
+
 	<main>
 		<div class="top-row px-4">
-			<div class="nav-link">
-				<span style="">Talon</span>
-			</div>
-			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-				Home
-			</NavLink>
 			<NavLink class="nav-link" href="addwallet">
 				Add Wallet
 			</NavLink>
-			<NavLink class="nav-link" href="fetchdata">
+			<NavLink class="nav-link" href="sendfunds">
+				Send Funds
+			</NavLink>
+			<NavLink class="nav-link" href="receivefunds">
+				Receive Funds
+			</NavLink>
+			<NavLink class="nav-link" href="settings">
 				Settings
 			</NavLink>
 		</div>

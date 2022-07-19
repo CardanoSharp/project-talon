@@ -41,7 +41,11 @@
                 @foreach (var ws in wallets)
                 {
                     <tr>
-                        <td>@ws.Name</td>
+                        <td>
+                            <a class="nav-link" href="/singlewallet/@ws.Id">
+                                @ws.Name
+                            </a>
+                        </td>
                         <td>@ws.Ada</td>
                     </tr>
                 }
@@ -82,7 +86,7 @@
 </div>
 
 @code {
-    public record WalletSummary(string Name, decimal Ada);
+    public record WalletSummary(int Id, string Name, decimal Ada);
     public record TransactionSummary(string WalletName, string TransactionHash, string BlockHeight, decimal Ada, bool HasAssets);
     private PieConfig _config;
     private List<WalletSummary> wallets = new List<WalletSummary>();
@@ -118,7 +122,7 @@
             decimal lovelaces = wallet.AddressInformation.Sum(x => decimal.Parse(x.Balance));
             decimal ada = lovelaces / 1000000.000m;
             dataset.Add(ada);
-            wallets.Add(new WalletSummary(wallet.Name, ada));
+            wallets.Add(new WalletSummary(wallet.Id, wallet.Name, ada));
 
             foreach(var utxo in wallet.AddressInformation.Select(x => x.UtxoSets)){
                 foreach (var tx in utxo) {
