@@ -1,4 +1,5 @@
-﻿@page "/singlewallet/{walletId:int}"
+﻿@page "/wallet/{walletId}"
+@implements IDisposable
 @using CardanoSharp.Koios.Sdk
 @using CardanoSharp.Koios.Sdk.Contracts
 @using CardanoSharp.Wallet
@@ -19,41 +20,75 @@
 @inject IAddressClient addressClient
 @inject IAssetClient assetClient
 @inject ITransactionClient transactionClient
+@inject CurrentWalletState CurrentWallet
 
-@if(wallet is null) {
-    <h2>Loading...</h2>
-}else {
+@if (wallet == null)
+{
+    <h2>Please Create/Restore a Wallet</h2>
+}
+else
+{
     <h2>Wallet: @wallet.Name</h2>
-    <hr/>
+    <hr />
     <div class="row">
         <div class="col-4">
             <h4>Summary</h4>
             <table class="table">
                 <tbody>
-                    <tr>
-                        <td>ADA</td>
-                        <td>@stakeInformation.TotalBalance</td>
-                    </tr>
-                    <tr>
-                        <td>Rewards</td>
-                        <td>@stakeInformation.Rewards</td>
-                    </tr>
-                    <tr>
-                        <td>Rewards Available</td>
-                        <td>@stakeInformation.RewardsAvailable</td>
-                    </tr>
-                    <tr>
-                        <td>Withdrawals</td>
-                        <td>@stakeInformation.Withdrawals</td>
-                    </tr>
-                    <tr>
-                        <td>Reserves</td>
-                        <td>@stakeInformation.Reserves</td>
-                    </tr>
-                    <tr>
-                        <td>Treasury</td>
-                        <td>@stakeInformation.Treasury</td>
-                    </tr>
+                    @if (stakeInformation != null)
+                    {
+                        <tr>
+                            <td>ADA</td>
+                            <td>@stakeInformation.TotalBalance</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards</td>
+                            <td>@stakeInformation.Rewards</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards Available</td>
+                            <td>@stakeInformation.RewardsAvailable</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawals</td>
+                            <td>@stakeInformation.Withdrawals</td>
+                        </tr>
+                        <tr>
+                            <td>Reserves</td>
+                            <td>@stakeInformation.Reserves</td>
+                        </tr>
+                        <tr>
+                            <td>Treasury</td>
+                            <td>@stakeInformation.Treasury</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>ADA</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards Available</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawals</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Reserves</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Treasury</td>
+                            <td>...</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -65,7 +100,7 @@
                     {
                         <tr>
                             <td><img src="@asset.Image" width="50px" /></td>
-                            <td>@asset.Name <br/> <span style="font-size: 14px">@asset.PolicyId</span></td>
+                            <td>@asset.Name <br /> <span style="font-size: 14px">@asset.PolicyId</span></td>
                             <td>@asset.Quantity</td>
                         </tr>
                     }
@@ -107,30 +142,51 @@
 }
 
 @code {
-    [Parameter]
-    public int walletId { get; set; }
-
     public record AssetSummary(string Image, string PolicyId, string Name, string Quantity);
     public record TransactionSummary(string WalletName, string TransactionHash, string BlockHeight, decimal Ada, bool HasAssets);
 
     public string stakeAddress { get; set; }
-    public Wallet wallet { get; set; }
+
     public StakeInformation stakeInformation { get; set; }
     private List<TransactionSummary> transactions = new List<TransactionSummary>();
     private List<AssetSummary> assets = new List<AssetSummary>();
 
-    protected async override Task OnInitializedAsync()
-    {
-        wallet = await walletDatabase.GetByIdAsync(walletId);
-        wallet.Keys = await walletKeyDatabase.GetWalletKeysAsync(walletId);
-        wallet.AddressInformation = new List<AddressInformation>();
+    [Parameter]
+    public string walletId { get; set; }
 
-        await GetBalance();
-        await GetTransactions();
-        await GetAssets();
+    public Wallet wallet { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue<string>(nameof(walletId), out var value))
+        {
+            stakeInformation = null;
+            transactions.Clear();
+            assets.Clear();
+
+            wallet = CurrentWallet.Wallet;
+        }
+
+        await base.SetParametersAsync(parameters);
+        await LoadWallet();
     }
 
-    public async Task GetAssets() 
+    private async Task LoadWallet()
+    {
+        if (wallet != null)
+        {
+            wallet.Keys = await walletKeyDatabase.GetWalletKeysAsync(wallet.Id);
+            wallet.AddressInformation = new List<AddressInformation>();
+
+            await GetBalance();
+            await GetTransactions();
+            StateHasChanged();
+            await GetAssets();
+            StateHasChanged();
+        }
+    }
+
+    public async Task GetAssets()
     {
         var accountItems = await accountClient.GetStakeAssets(stakeAddress);
         foreach (var ai in accountItems.Content)
@@ -196,7 +252,7 @@
         return string.Empty;
     }
 
-    public async Task GetTransactions() 
+    public async Task GetTransactions()
     {
         foreach (var utxo in wallet.AddressInformation.Select(x => x.UtxoSets))
         {
@@ -207,11 +263,11 @@
         }
     }
 
-    public async Task GetBalance() 
+    public async Task GetBalance()
     {
         string bechAddress = string.Empty;
         StakeAddress[] addresses;
-        switch(wallet.WalletType)
+        switch (wallet.WalletType)
         {
             case (int)WalletType.HD:
                 var walletKey = wallet.Keys.FirstOrDefault();
@@ -229,7 +285,7 @@
                 var stake = publicKey
                     .Derive(RoleType.Staking)
                     .Derive(0);
-                    
+
                 bechAddress = new AddressService().GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet).ToString();
                 stakeAddress = new AddressService().GetRewardAddress(stake.PublicKey, NetworkType.Testnet).ToString();
                 var addressesResponse = await accountClient.GetStakeAddresses(bechAddress);
@@ -257,7 +313,7 @@
                 throw new Exception("Unknown wallet type.");
         }
 
-        foreach(var address in addresses)
+        foreach (var address in addresses)
         {
             var addrBalanceResponse = await addressClient.GetAddressInformation(address.Address);
             wallet.AddressInformation.AddRange(addrBalanceResponse.Content);
@@ -268,21 +324,25 @@
             var stakeInformationResponse = await accountClient.GetStakeInformation(addresses.First().Address);
             var responseModel = stakeInformationResponse.Content.FirstOrDefault();
 
-            if(responseModel is not null) 
+            if (responseModel is not null)
             {
                 stakeInformation = new StakeInformation()
-                {
-                    DelegatedPool = responseModel.DelegatedPool,
-                    TotalBalance = (decimal.Parse(responseModel.TotalBalance) / 1000000.000m).ToString(),
-                    Reserves = responseModel.Reserves,
-                    Rewards = responseModel.Rewards,
-                    RewardsAvailable = responseModel.RewardsAvailable,
-                    Status = responseModel.Status,
-                    Treasury = responseModel.Treasury,
-                    Utxo = responseModel.Utxo,
-                    Withdrawals = responseModel.Withdrawals
-                };
+                    {
+                        DelegatedPool = responseModel.DelegatedPool,
+                        TotalBalance = (decimal.Parse(responseModel.TotalBalance) / 1000000.000m).ToString(),
+                        Reserves = responseModel.Reserves,
+                        Rewards = responseModel.Rewards,
+                        RewardsAvailable = responseModel.RewardsAvailable,
+                        Status = responseModel.Status,
+                        Treasury = responseModel.Treasury,
+                        Utxo = responseModel.Utxo,
+                        Withdrawals = responseModel.Withdrawals
+                    };
             }
         }
+    }
+
+    public void Dispose()
+    {
     }
 }

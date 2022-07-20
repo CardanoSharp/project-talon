@@ -33,6 +33,8 @@ namespace ProjectTalon.MauiBlazor
             builder.Services.AddTransient<ISettingsDatabase, SettingsDatabase>();
             builder.Services.AddTransient<Core.Services.IAddressService, Core.Services.AddressService>();
 
+            builder.Services.AddSingleton<CurrentWalletState>();
+
             return builder.Build();
         }
     }

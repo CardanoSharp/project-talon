@@ -1,13 +1,25 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using ProjectTalon.Core.Common
+@using ProjectTalon.Core.Data
+@using ProjectTalon.Core.Data.Models
+@using ProjectTalon.MauiBlazor.Components
+
+@inject CurrentWalletState CurrentWallet
+@inject IWalletDatabase walletDatabase
+@inject ISettingsDatabase settingsDatabase
+
+<div class="top-row ps-3 navbar navbar-dark">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="">Talon</a>
-		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-			<span class="navbar-toggler-icon"></span>
-		</button>
+		<a @onclick="ChangeWallet" style="color: white">
+			@if(CurrentWallet.Wallet == null) {
+				<span>Loading...</span>
+			}else {
+				@CurrentWallet.Wallet.Name
+			}
+		</a>
 	</div>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div>
 	<nav class="flex-column">
 		<div class="nav-item px-3">
 			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -22,13 +34,59 @@
 	</nav>
 </div>
 
+@if (modalIsOpen)
+{
+    <Modal OnClose="@OnDeleteDialogClose" Wallets="@wallets" />
+}
+
 @code {
+	private Modal modal { get; set; }
+
+	private List<Wallet> wallets { get; set; }
+
 	private bool collapseNavMenu = true;
+	private bool modalIsOpen = false;
 
-	private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-	private void ToggleNavMenu()
+	private void ChangeWallet()
 	{
-		collapseNavMenu = !collapseNavMenu;
+		modalIsOpen = true;
+		StateHasChanged();
 	}
+
+	private async Task OnDeleteDialogClose(Wallet wallet)
+	{
+		if (wallet != null)
+		{
+			var currentWalletSetting = await settingsDatabase.GetByKeyAsync(SettingKeys.CURRENT_WALLET);
+			if(currentWalletSetting == null) {
+				currentWalletSetting = new Settings()
+					{
+						Key = SettingKeys.CURRENT_WALLET
+					};
+			}
+			currentWalletSetting.Value = wallet.Id.ToString();
+			await settingsDatabase.SaveAsync(currentWalletSetting);
+
+			CurrentWallet.Wallet = wallet;
+		}
+
+		modalIsOpen = false;
+		StateHasChanged();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		wallets = await walletDatabase.ListAsync();
+
+		var currentWalletSetting = await settingsDatabase.GetByKeyAsync(SettingKeys.CURRENT_WALLET);
+
+		if(wallets.Any()) {
+			if(currentWalletSetting is null) {
+				CurrentWallet.Wallet = wallets.First();
+			}else {
+				CurrentWallet.Wallet = wallets.FirstOrDefault(x => x.Id == int.Parse(currentWalletSetting.Value));
+			}
+		}
+	}
+
 }

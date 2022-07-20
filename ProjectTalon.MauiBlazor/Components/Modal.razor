@@ -1,0 +1,188 @@
+﻿@using CardanoSharp.Wallet
+@using ProjectTalon.Core.Data
+@using ProjectTalon.Core.Data.Models
+@using System.ComponentModel.DataAnnotations
+
+@inject Core.Services.IAddressService addressService
+@inject IWalletDatabase walletDatabase
+
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Current Wallet</h4>
+                <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
+            </div>
+            <div class="modal-body">
+                @switch(modalState) 
+                {
+                    case ModalState.List:
+                        <table>
+                            <thead>
+                                <th>Wallet Name</th>
+                                <th></th>
+                            </thead>
+                            <tbody>
+                                @foreach (var w in Wallets)
+                                {
+                                <tr>
+                                    <td>@w.Name</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" @onclick="() => SelectWallet(w)">Select</button>
+                                    </td>
+                                </tr>
+                                }
+                                <tr>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" @onclick="@CreateWallet">Create Wallet</button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary" @onclick="@RestoreWallet">Restore Wallet</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        break;
+
+                    case ModalState.Create:
+                        <EditForm EditContext="editContext" Model="@addWalletModel" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="mb-3">
+                                <label class="form-label">Name:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Name" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mnemonic:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Mnemonic" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Password" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </EditForm>
+                        break;
+
+                    case ModalState.Restore:
+                        <EditForm EditContext="editContext" Model="@addWalletModel" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="mb-3">
+                                <label class="form-label">Name:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Name" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mnemonic:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Mnemonic" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password:</label>
+                                <InputText class="form-control" @bind-Value="addWalletModel.Password" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Restore</button>
+                        </EditForm>
+                        break;
+
+                    default:
+                        break;
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" @onclick="@ModalCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<Wallet> Wallets { get; set; }
+
+    [Parameter]
+    public EventCallback<Wallet> OnClose { get; set; }
+
+    public ModalState modalState = ModalState.List;
+
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync(null);
+    }
+
+    private Task SelectWallet(Wallet wallet)
+    {
+        return OnClose.InvokeAsync(wallet);
+    }
+
+    private void CreateWallet() 
+    {
+        addWalletModel.Mnemonic = new MnemonicService().Generate(24).Words;
+        modalState = ModalState.Create;
+    }
+
+    private void RestoreWallet()
+    {
+        modalState = ModalState.Restore;
+    }
+
+
+
+    private EditContext? editContext;
+    private AddWalletModel addWalletModel = new();
+    private ValidationMessageStore? messageStore;
+
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new(addWalletModel);
+        editContext.OnValidationRequested += HandleValidationRequested;
+    }
+
+    private void HandleValidationRequested(object? sender,
+        ValidationRequestedEventArgs args)
+    {
+        messageStore?.Clear();
+
+        // Custom validation logic
+        var wallet = walletDatabase.GetByNameAsync(addWalletModel.Name).Result;
+        if(wallet != null)
+        {
+            messageStore?.Add(() => addWalletModel.Name, "Name already exists");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Process the valid form
+        var wallet = await walletDatabase.GetByNameAsync(addWalletModel.Name);
+
+        if(wallet != null) 
+
+        await addressService.AddWallet(addWalletModel.Name, addWalletModel.Mnemonic, addWalletModel.Password);
+        wallet = await walletDatabase.GetByNameAsync(addWalletModel.Name);
+
+        await OnClose.InvokeAsync(wallet);
+    }
+
+    public class AddWalletModel
+    {
+        [Required]
+        public string? Name { get; set; }
+
+        [Required]
+        public string? Mnemonic { get; set; }
+
+        [Required]
+        public string? Password { get; set; }
+    }
+
+    public enum ModalState
+    {
+        List,
+        Create,
+        Restore
+    }
+}
