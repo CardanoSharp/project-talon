@@ -7,12 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.Core", "Projec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.UI", "ProjectTalon.UI\ProjectTalon.UI.csproj", "{F25CD20A-4403-41C3-B376-C0B47B37DF25}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardanoSharp.Wallet", "D:\CardanoSharp\cardanosharp-wallet\CardanoSharp.Wallet\CardanoSharp.Wallet.csproj", "{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardanoSharp.Koios.Sdk", "D:\CardanoSharp\cardanosharp-koios\CardanoSharp.Koios.Sdk\CardanoSharp.Koios.Sdk.csproj", "{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTalon.MauiBlazor", "ProjectTalon.MauiBlazor\ProjectTalon.MauiBlazor.csproj", "{305D839D-9575-47A3-A302-605C7B06CF2D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,34 +31,6 @@ Global
 		{F25CD20A-4403-41C3-B376-C0B47B37DF25}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F25CD20A-4403-41C3-B376-C0B47B37DF25}.Release|x64.ActiveCfg = Release|Any CPU
 		{F25CD20A-4403-41C3-B376-C0B47B37DF25}.Release|x64.Build.0 = Release|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Debug|x64.Build.0 = Debug|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Release|Any CPU.Build.0 = Release|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Release|x64.ActiveCfg = Release|Any CPU
-		{33A19DF3-B9D3-4FDC-8EB3-8FCA3792EE04}.Release|x64.Build.0 = Release|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Debug|x64.Build.0 = Debug|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|x64.ActiveCfg = Release|Any CPU
-		{48FE3268-1E6D-4C7F-9EDA-502CC223A53D}.Release|x64.Build.0 = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.Build.0 = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Debug|x64.Deploy.0 = Debug|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.ActiveCfg = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.Build.0 = Release|Any CPU
-		{305D839D-9575-47A3-A302-605C7B06CF2D}.Release|x64.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
