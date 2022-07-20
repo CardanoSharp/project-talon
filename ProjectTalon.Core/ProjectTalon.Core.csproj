@@ -8,17 +8,11 @@
 
 
   <ItemGroup>
-<!--        <PackageReference Include="CardanoSharp.Koios.Sdk" Version="5.0.1" />
-<PackageReference Include="CardanoSharp.Wallet" Version="2.9.0" />-->
+    <PackageReference Include="CardanoSharp.Koios.Sdk" Version="5.1.3" />
+    <PackageReference Include="CardanoSharp.Wallet" Version="2.12.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.16.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <ProjectReference Include="D:\CardanoSharp\cardanosharp-koios\CardanoSharp.Koios.Sdk\CardanoSharp.Koios.Sdk.csproj" />
-    <ProjectReference Include="D:\CardanoSharp\cardanosharp-wallet\CardanoSharp.Wallet\CardanoSharp.Wallet.csproj" />
   </ItemGroup>
 </Project>
