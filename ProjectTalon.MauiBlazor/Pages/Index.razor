@@ -1,0 +1,25 @@
+﻿@page "/"
+
+@implements IDisposable
+
+@inject CurrentWalletState CurrentWallet
+
+
+
+@if(CurrentWallet.Wallet != null) {
+	<SingleWallet walletId="@CurrentWallet.Wallet.Id.ToString()" />
+}else {
+    <h1>Welcome to Talon</h1>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        CurrentWallet.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CurrentWallet.OnChange -= StateHasChanged;
+    }
+}

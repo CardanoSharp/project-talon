@@ -1,0 +1,348 @@
+﻿@page "/wallet/{walletId}"
+@implements IDisposable
+@using CardanoSharp.Koios.Sdk
+@using CardanoSharp.Koios.Sdk.Contracts
+@using CardanoSharp.Wallet
+@using CardanoSharp.Wallet.Enums
+@using CardanoSharp.Wallet.Extensions
+@using CardanoSharp.Wallet.Extensions.Models
+@using CardanoSharp.Wallet.Models.Keys
+@using Newtonsoft.Json
+@using ProjectTalon.Core.Common
+@using ProjectTalon.Core.Data
+@using ProjectTalon.Core.Data.Models
+@using System.Text
+@using System.Text.RegularExpressions
+
+@inject IWalletDatabase walletDatabase
+@inject IWalletKeyDatabase walletKeyDatabase
+@inject IAccountClient accountClient
+@inject IAddressClient addressClient
+@inject IAssetClient assetClient
+@inject ITransactionClient transactionClient
+@inject CurrentWalletState CurrentWallet
+
+@if (wallet == null)
+{
+    <h2>Please Create/Restore a Wallet</h2>
+}
+else
+{
+    <h2>Wallet: @wallet.Name</h2>
+    <hr />
+    <div class="row">
+        <div class="col-4">
+            <h4>Summary</h4>
+            <table class="table">
+                <tbody>
+                    @if (stakeInformation != null)
+                    {
+                        <tr>
+                            <td>ADA</td>
+                            <td>@stakeInformation.TotalBalance</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards</td>
+                            <td>@stakeInformation.Rewards</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards Available</td>
+                            <td>@stakeInformation.RewardsAvailable</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawals</td>
+                            <td>@stakeInformation.Withdrawals</td>
+                        </tr>
+                        <tr>
+                            <td>Reserves</td>
+                            <td>@stakeInformation.Reserves</td>
+                        </tr>
+                        <tr>
+                            <td>Treasury</td>
+                            <td>@stakeInformation.Treasury</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>ADA</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Rewards Available</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawals</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Reserves</td>
+                            <td>...</td>
+                        </tr>
+                        <tr>
+                            <td>Treasury</td>
+                            <td>...</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-8" style="max-height: 300px; overflow-y: scroll">
+            <h4>Assets</h4>
+            <table class="table">
+                <tbody>
+                    @foreach (var asset in assets)
+                    {
+                        <tr>
+                            <td><img src="@asset.Image" width="50px" /></td>
+                            <td>@asset.Name <br /> <span style="font-size: 14px">@asset.PolicyId</span></td>
+                            <td>@asset.Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h4>Transactions</h4>
+        </div>
+        <div class="col-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Wallet</th>
+                        <th scope="col">Tx Hash</th>
+                        <th scope="col">Block</th>
+                        <th scope="col">ADA</th>
+                        <th scope="col">Has Assets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tx in transactions.OrderByDescending(x => x.BlockHeight))
+                    {
+                        <tr>
+                            <td>@tx.WalletName</td>
+                            <td>@tx.TransactionHash</td>
+                            <td>@tx.BlockHeight</td>
+                            <td>@tx.Ada</td>
+                            <td>@tx.HasAssets.ToString().ToUpper()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    public record AssetSummary(string Image, string PolicyId, string Name, string Quantity);
+    public record TransactionSummary(string WalletName, string TransactionHash, string BlockHeight, decimal Ada, bool HasAssets);
+
+    public string stakeAddress { get; set; }
+
+    public StakeInformation stakeInformation { get; set; }
+    private List<TransactionSummary> transactions = new List<TransactionSummary>();
+    private List<AssetSummary> assets = new List<AssetSummary>();
+
+    [Parameter]
+    public string walletId { get; set; }
+
+    public Wallet wallet { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        if (parameters.TryGetValue<string>(nameof(walletId), out var value))
+        {
+            stakeInformation = null;
+            transactions.Clear();
+            assets.Clear();
+
+            wallet = CurrentWallet.Wallet;
+        }
+
+        await base.SetParametersAsync(parameters);
+        await LoadWallet();
+    }
+
+    private async Task LoadWallet()
+    {
+        if (wallet != null)
+        {
+            wallet.Keys = await walletKeyDatabase.GetWalletKeysAsync(wallet.Id);
+            wallet.AddressInformation = new List<AddressInformation>();
+
+            await GetBalance();
+            await GetTransactions();
+            StateHasChanged();
+            await GetAssets();
+            StateHasChanged();
+        }
+    }
+
+    public async Task GetAssets()
+    {
+        var accountItems = await accountClient.GetStakeAssets(stakeAddress);
+        foreach (var ai in accountItems.Content)
+        {
+            var assetNameHex = Encoding.ASCII.GetBytes(ai.AssetName).ToStringHex();
+
+            var assetInfo = (await assetClient.GetInfo(ai.AssetPolicy, assetNameHex));
+            var txMetadata = await transactionClient.GetTransactionMetadata(new GetTransactionRequest()
+                {
+                    TxHashes = new List<string>() { assetInfo.Content[0].MintingTxHash }
+                });
+
+            string image = string.Empty;
+            foreach (var tm in txMetadata.Content)
+            {
+                if (!string.IsNullOrEmpty(image)) break;
+
+                if (tm.Metadata is null) continue;
+
+                foreach (var metadata in tm.Metadata)
+                {
+                    if (metadata.Key == 721)
+                    {
+                        image = GetImageUrl(metadata.Value.ToString());
+                    }
+                }
+            }
+
+            assets.Add(new AssetSummary(image, ai.AssetPolicy, ai.AssetName, ai.Quantity));
+        }
+    }
+
+    private string GetImageUrl(string metadata)
+    {
+        string ipfsUrl = string.Empty;
+        var singleString = "(ipfs?):\\/\\/(.)?[a-z0-9\\.:].*?(?=\\\")";
+        var multiString = "(ipfs?):\\/\\/(.)?[a-z0-9\\.:].*?(?=\\\"])";
+
+        Regex multiRX = new Regex(multiString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        MatchCollection matches = multiRX.Matches(metadata);
+
+        if (!matches.Any())
+        {
+            Regex singleRX = new Regex(singleString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            matches = singleRX.Matches(metadata);
+
+            if (matches.Any())
+            {
+                ipfsUrl = matches.First().Value;
+            }
+
+        }
+        else
+        {
+            ipfsUrl = matches.First().Value.Replace("\", \"", "");
+        }
+
+        if (!string.IsNullOrEmpty(ipfsUrl))
+        {
+            return $"https://ipfs.io/ipfs/{string.Join("", ipfsUrl).Split("//").Last()}";
+        }
+
+        return string.Empty;
+    }
+
+    public async Task GetTransactions()
+    {
+        foreach (var utxo in wallet.AddressInformation.Select(x => x.UtxoSets))
+        {
+            foreach (var tx in utxo)
+            {
+                transactions.Add(new TransactionSummary(wallet.Name, tx.TxHash, tx.BlockHeight.ToString(), (long.Parse(tx.Value) / 1000000.000m), tx.AssetList.Any()));
+            }
+        }
+    }
+
+    public async Task GetBalance()
+    {
+        string bechAddress = string.Empty;
+        StakeAddress[] addresses;
+        switch (wallet.WalletType)
+        {
+            case (int)WalletType.HD:
+                var walletKey = wallet.Keys.FirstOrDefault();
+                if (walletKey is null)
+                    throw new Exception("Keys not found");
+
+                var publicKey = JsonConvert.DeserializeObject<PublicKey>(walletKey.Vkey);
+                if (publicKey is null)
+                    throw new Exception("Wallet not found");
+
+                var payment = publicKey
+                    .Derive(RoleType.ExternalChain)
+                    .Derive(0);
+
+                var stake = publicKey
+                    .Derive(RoleType.Staking)
+                    .Derive(0);
+
+                bechAddress = new AddressService().GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet).ToString();
+                stakeAddress = new AddressService().GetRewardAddress(stake.PublicKey, NetworkType.Testnet).ToString();
+                var addressesResponse = await accountClient.GetStakeAddresses(bechAddress);
+                if (addressesResponse.Error is not null)
+                    throw new Exception(addressesResponse.Error.Message);
+
+                addresses = addressesResponse.Content;
+
+                break;
+            case (int)WalletType.KeyPair:
+                var paymentKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.External).Vkey;
+                var paymentKey = new PublicKey(paymentKeyStr.HexToByteArray(), null);
+                var stakeKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.Staking).Vkey;
+                var stakeKey = new PublicKey(stakeKeyStr.HexToByteArray(), null);
+
+                bechAddress = new AddressService().GetBaseAddress(paymentKey, stakeKey, NetworkType.Testnet).ToString();
+
+                addresses = new StakeAddress[1]{
+                    new StakeAddress() {
+                        Address = bechAddress
+                    }
+    };
+                break;
+            default:
+                throw new Exception("Unknown wallet type.");
+        }
+
+        foreach (var address in addresses)
+        {
+            var addrBalanceResponse = await addressClient.GetAddressInformation(address.Address);
+            wallet.AddressInformation.AddRange(addrBalanceResponse.Content);
+        }
+
+        if (addresses.Any())
+        {
+            var stakeInformationResponse = await accountClient.GetStakeInformation(addresses.First().Address);
+            var responseModel = stakeInformationResponse.Content.FirstOrDefault();
+
+            if (responseModel is not null)
+            {
+                stakeInformation = new StakeInformation()
+                    {
+                        DelegatedPool = responseModel.DelegatedPool,
+                        TotalBalance = (decimal.Parse(responseModel.TotalBalance) / 1000000.000m).ToString(),
+                        Reserves = responseModel.Reserves,
+                        Rewards = responseModel.Rewards,
+                        RewardsAvailable = responseModel.RewardsAvailable,
+                        Status = responseModel.Status,
+                        Treasury = responseModel.Treasury,
+                        Utxo = responseModel.Utxo,
+                        Withdrawals = responseModel.Withdrawals
+                    };
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+    }
+}

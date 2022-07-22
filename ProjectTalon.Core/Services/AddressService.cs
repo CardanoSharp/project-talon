@@ -35,6 +35,7 @@ namespace ProjectTalon.Core.Services
         {
             _addressClient = addressClient;
             _mnemonicService = mnemonicService;
+            _walletDatabase = walletDatabase;
             _walletKeyDatabase = walletKeyDatabase;
         }
         
