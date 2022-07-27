@@ -116,7 +116,6 @@ else
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">Wallet</th>
                         <th scope="col">Tx Hash</th>
                         <th scope="col">Block</th>
                         <th scope="col">ADA</th>
@@ -127,7 +126,6 @@ else
                     @foreach (var tx in transactions.OrderByDescending(x => x.BlockHeight))
                     {
                         <tr>
-                            <td>@tx.WalletName</td>
                             <td>@tx.TransactionHash</td>
                             <td>@tx.BlockHeight</td>
                             <td>@tx.Ada</td>

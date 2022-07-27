@@ -1,18 +1,36 @@
 ﻿@page "/receive"
+@using CardanoSharp.Koios.Sdk
+@using CardanoSharp.Koios.Sdk.Contracts
+@using CardanoSharp.Wallet
+@using CardanoSharp.Wallet.Enums
+@using CardanoSharp.Wallet.Extensions
+@using CardanoSharp.Wallet.Extensions.Models
+@using CardanoSharp.Wallet.Models.Keys
+@using Newtonsoft.Json
+@using ProjectTalon.Core.Common
 
 @inject CurrentWalletState CurrentWallet
+@inject IAddressClient addressClient
 
 <h1>Receive</h1>
+
+<div class="row">
+    <div class="col-12">
+        <button class="btn @(roleTypeSelection.RoleType == 0 ? "btn-primary" : "")" @onclick="() => ChangeAddressType(0)">External</button>
+        <button class="btn @(roleTypeSelection.RoleType == 1 ? "btn-primary" : "")" @onclick="() => ChangeAddressType(1)">Internal</button>
+    </div>
+</div>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Address</th>
+            <th>Address (@((RoleType)roleTypeSelection.RoleType))</th>
             <th>ADA</th>
         </tr>
     </thead>
     <tbody>
-        @foreach(var addrs in addressSummaries) {
+        @foreach (var addrs in addressSummaries)
+        {
             <tr>
                 <td>@addrs.Address</td>
                 <td>@addrs.Ada</td>
@@ -20,21 +38,107 @@
         }
     </tbody>
 </table>
+<table class="table">
+    <tbody>
+        <tr>
+            <td colspan="2"><button class="btn btn-primary" @onclick="LoadMore">Load More</button></td>
+        </tr>
+    </tbody>
+</table>
 
 @code {
     public List<AddressSummary> addressSummaries = new List<AddressSummary>();
     public int currentIndex = 0;
+    public RoleTypeSelection roleTypeSelection = new RoleTypeSelection
+    {
+        RoleType = 0   
+    };
+
+    private async Task LoadMore() 
+    {
+        currentIndex += 10;
+        await LoadAddresses();
+    }
+
+    private async Task ChangeAddressType(int i)
+    {
+        //roleTypeSelection.RoleType = args.Value;
+        currentIndex = 0;
+        addressSummaries.Clear();
+
+        if (roleTypeSelection.RoleType == (int)RoleType.ExternalChain)
+            roleTypeSelection.RoleType = (int)RoleType.InternalChain;
+        else
+            roleTypeSelection.RoleType = (int)RoleType.ExternalChain;
+        await LoadAddresses();
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAddresses();
+    }
+
+    private async Task LoadAddresses() 
+    {
         var wallet = CurrentWallet.Wallet;
-
         int cnt = 0;
-        while (cnt < 10) {
+        while (cnt < 10)
+        {
+            string bechAddress = string.Empty;
+            StakeAddress[] addresses;
+            switch (wallet.WalletType)
+            {
+                case (int)WalletType.HD:
+                    var walletKey = wallet.Keys.FirstOrDefault();
+                    if (walletKey is null)
+                        throw new Exception("Keys not found");
 
+                    var publicKey = JsonConvert.DeserializeObject<PublicKey>(walletKey.Vkey);
+                    if (publicKey is null)
+                        throw new Exception("Wallet not found");
+
+                    var payment = publicKey
+                        .Derive((RoleType)roleTypeSelection.RoleType)
+                        .Derive(currentIndex + cnt);
+
+                    var stake = publicKey
+                        .Derive(RoleType.Staking)
+                        .Derive(0);
+
+                    bechAddress = new AddressService().GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet).ToString();
+                    break;
+                case (int)WalletType.KeyPair:
+                    var paymentKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.External).Vkey;
+                    var paymentKey = new PublicKey(paymentKeyStr.HexToByteArray(), null);
+                    var stakeKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.Staking).Vkey;
+                    var stakeKey = new PublicKey(stakeKeyStr.HexToByteArray(), null);
+
+                    bechAddress = new AddressService().GetBaseAddress(paymentKey, stakeKey, NetworkType.Testnet).ToString();
+                    break;
+                default:
+                    throw new Exception("Unknown wallet type.");
+            }
+
+            var addressResponse = await addressClient.GetAddressInformation(bechAddress);
+            if (addressResponse.Error is not null)
+                throw new Exception(addressResponse.Error.Message);
+
+            decimal balance = 0;
+            if (addressResponse.Content.FirstOrDefault() != null
+                && decimal.TryParse(addressResponse.Content.FirstOrDefault().Balance, out balance))
+                balance = balance / 1000000;
+
+
+            addressSummaries.Add(new AddressSummary(bechAddress, balance.ToString()));
+            StateHasChanged();
             cnt++;
         }
     }
 
-    public record AddressSummary(string Address, decimal Ada);
+    public class RoleTypeSelection
+    {
+        public int RoleType { get; set; }   
+    };
+
+    public record AddressSummary(string Address, string Ada);
 }
