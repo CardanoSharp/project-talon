@@ -3,6 +3,7 @@
 @using ProjectTalon.Core.Data.Models
 @using ProjectTalon.MauiBlazor.Components
 
+@implements IDisposable
 @inject CurrentWalletState CurrentWallet
 @inject IWalletDatabase walletDatabase
 @inject ISettingsDatabase settingsDatabase
@@ -10,9 +11,7 @@
 <div class="top-row ps-3 navbar navbar-dark">
 	<div class="container-fluid">
 		<a @onclick="ChangeWallet" style="color: white;cursor:pointer">
-			@if(CurrentWallet.Wallet == null) {
-				<span>Loading...</span>
-			}else {
+			@if(CurrentWallet.Wallet != null) {
 				<div style="display: flex;flex-direction: row;justify-content: space-between;">
 					<div style="width: 11em;">@CurrentWallet.Wallet.Name</div>
 					<div><i class="material-icons">more_vert</i></div>
@@ -24,6 +23,7 @@
 
 <div>
 	<nav class="flex-column">
+		@if(CurrentWallet.Wallet != null) {
 		<div class="nav-item px-3">
 			<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
 				Dashboard
@@ -34,6 +34,12 @@
 				Transactions
 			</NavLink>
 		</div>
+		<div class="nav-item px-3">
+			<NavLink class="nav-link" href="receive">
+				Receive
+			</NavLink>
+		</div>
+		}
 	</nav>
 </div>
 
@@ -49,6 +55,16 @@
 
 	private bool collapseNavMenu = true;
 	private bool modalIsOpen = false;
+
+	protected override void OnInitialized()
+	{
+		CurrentWallet.OnChange += StateHasChanged;
+	}
+
+	public void Dispose()
+	{
+		CurrentWallet.OnChange -= StateHasChanged;
+	}
 
 	private void ChangeWallet()
 	{
@@ -69,8 +85,7 @@
 			}
 			currentWalletSetting.Value = wallet.Id.ToString();
 			await settingsDatabase.SaveAsync(currentWalletSetting);
-
-			CurrentWallet.Wallet = wallet;
+			await ResetCurrentWalletAndList();
 		}
 
 		modalIsOpen = false;
@@ -79,17 +94,25 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		await ResetCurrentWalletAndList();
+	}
+
+	private async Task ResetCurrentWalletAndList() 
+	{
 		wallets = await walletDatabase.ListAsync();
 
 		var currentWalletSetting = await settingsDatabase.GetByKeyAsync(SettingKeys.CURRENT_WALLET);
 
-		if(wallets.Any()) {
-			if(currentWalletSetting is null) {
+		if (wallets.Any())
+		{
+			if (currentWalletSetting is null)
+			{
 				CurrentWallet.Wallet = wallets.First();
-			}else {
+			}
+			else
+			{
 				CurrentWallet.Wallet = wallets.FirstOrDefault(x => x.Id == int.Parse(currentWalletSetting.Value));
 			}
 		}
 	}
-
 }
