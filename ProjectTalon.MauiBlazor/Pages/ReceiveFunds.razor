@@ -1,7 +1,40 @@
-﻿@page "/receivefunds"
+﻿@page "/receive"
 
-<h3>ReceiveFunds</h3>
+@inject CurrentWalletState CurrentWallet
+
+<h1>Receive</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>ADA</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var addrs in addressSummaries) {
+            <tr>
+                <td>@addrs.Address</td>
+                <td>@addrs.Ada</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
+    public List<AddressSummary> addressSummaries = new List<AddressSummary>();
+    public int currentIndex = 0;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var wallet = CurrentWallet.Wallet;
+
+        int cnt = 0;
+        while (cnt < 10) {
+
+            cnt++;
+        }
+    }
+
+    public record AddressSummary(string Address, decimal Ada);
 }

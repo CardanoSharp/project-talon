@@ -17,7 +17,7 @@ namespace ProjectTalon.Core.Services
         Task<string?> GetWalletAddress(int? addressIndex = null);
         Task<string?> GetChangeAddress(int? addressIndex = null);
         Task<List<Utxo>> GetUtxos(string address);
-        Task AddWallet(string name, string recoveryPhrase, string spendingPassword);
+        Task<Wallet> AddWallet(string name, string recoveryPhrase, string spendingPassword);
     }
 
     public class AddressService: IAddressService
@@ -128,13 +128,11 @@ namespace ProjectTalon.Core.Services
             }
         }
 
-        public async Task AddWallet(string name, string recoveryPhrase, string spendingPassword)
+        public async Task<Wallet> AddWallet(string name, string recoveryPhrase, string spendingPassword)
         {
             // Restore a Mnemonic
             var mnemonic = _mnemonicService.Restore(recoveryPhrase);
-            Wallet newlyCreatedWallet;
-            int walletId = 0;
-            int walletKeyId = 0;
+            Wallet? newlyCreatedWallet;
 
             if (await _walletDatabase.ExistsAsync(name))
             {
@@ -143,7 +141,7 @@ namespace ProjectTalon.Core.Services
 
             int accountIx = 0;
 
-            walletId = await _walletDatabase.SaveAsync(new Wallet
+            await _walletDatabase.SaveAsync(new Wallet
             {
                 Name = name,
                 WalletType = (int)WalletType.HD,
@@ -151,13 +149,18 @@ namespace ProjectTalon.Core.Services
 
             newlyCreatedWallet = await _walletDatabase.GetByNameAsync(name);
 
+            if (newlyCreatedWallet == null)
+            {
+                throw new Exception("Unable to create wallet.");
+            }
+
             var accountNode = mnemonic.GetMasterNode()
                 .Derive(PurposeType.Shelley)
                 .Derive(CoinType.Ada)
                 .Derive(accountIx);
             accountNode.SetPublicKey();
 
-            walletKeyId = await _walletKeyDatabase.SaveWalletAsync(new WalletKey
+            await _walletKeyDatabase.SaveWalletAsync(new WalletKey
             {
                 WalletId = newlyCreatedWallet.Id,
                 KeyType = (int)KeyType.Account,
@@ -168,9 +171,9 @@ namespace ProjectTalon.Core.Services
             });
 
 
-            var wallets = await _walletDatabase.ListAsync();
-            var wallet = await _walletDatabase.GetByIdAsync(walletId);
-            var walletKey = await _walletKeyDatabase.GetWalletKeyAsync(walletKeyId);
+            var wallet = await _walletDatabase.GetByNameAsync(name);
+            wallet.Keys = await _walletKeyDatabase.GetWalletKeysAsync(wallet.Id);
+            return wallet;
         }
     }
 }

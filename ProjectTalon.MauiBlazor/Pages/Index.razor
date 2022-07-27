@@ -1,15 +1,26 @@
 ﻿@page "/"
 
 @implements IDisposable
+@using ProjectTalon.Core.Common
+@using ProjectTalon.Core.Data
+@using ProjectTalon.Core.Data.Models
+@using ProjectTalon.MauiBlazor.Components
 
 @inject CurrentWalletState CurrentWallet
+@inject IWalletDatabase walletDatabase
+@inject ISettingsDatabase settingsDatabase
 
 
 
 @if(CurrentWallet.Wallet != null) {
 	<SingleWallet walletId="@CurrentWallet.Wallet.Id.ToString()" />
 }else {
-    <h1>Welcome to Talon</h1>
+	<h1>Welcome to Talon</h1>
+	<button class="btn btn-primary" @onclick="ChangeWallet">Create/Restore Wallet</button>
+	@if (modalIsOpen)
+	{
+		<Modal OnClose="@OnDeleteDialogClose" Wallets="@wallets" />
+	}
 }
 
 @code {
@@ -21,5 +32,38 @@
     public void Dispose()
     {
         CurrentWallet.OnChange -= StateHasChanged;
-    }
+	}
+
+
+	private bool collapseNavMenu = true;
+	private bool modalIsOpen = false;
+
+	private List<Wallet> wallets { get; set; }
+	private async Task OnDeleteDialogClose(Wallet wallet)
+	{
+		if (wallet != null)
+		{
+			ProjectTalon.Core.Data.Models.Settings currentWalletSetting = await settingsDatabase.GetByKeyAsync(SettingKeys.CURRENT_WALLET);
+			if (currentWalletSetting == null)
+			{
+				currentWalletSetting = new ProjectTalon.Core.Data.Models.Settings()
+					{
+						Key = SettingKeys.CURRENT_WALLET
+					};
+			}
+			currentWalletSetting.Value = wallet.Id.ToString();
+			await settingsDatabase.SaveAsync(currentWalletSetting);
+
+			CurrentWallet.Wallet = wallet;
+		}
+
+		modalIsOpen = false;
+		StateHasChanged();
+	}
+
+	private void ChangeWallet()
+	{
+		modalIsOpen = true;
+		StateHasChanged();
+	}
 }

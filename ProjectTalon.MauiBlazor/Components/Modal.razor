@@ -17,20 +17,24 @@
                 @switch(modalState) 
                 {
                     case ModalState.List:
+                        
                         <table>
                             <thead>
                                 <th>Wallet Name</th>
                                 <th></th>
                             </thead>
                             <tbody>
-                                @foreach (var w in Wallets)
+                                @if (Wallets != null)
                                 {
-                                <tr>
-                                    <td>@w.Name</td>
-                                    <td>
-                                        <button type="button" class="btn btn-primary" @onclick="() => SelectWallet(w)">Select</button>
-                                    </td>
-                                </tr>
+                                    @foreach (var w in Wallets)
+                                    {
+                                    <tr>
+                                        <td>@w.Name</td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => SelectWallet(w)">Select</button>
+                                        </td>
+                                    </tr>
+                                    }
                                 }
                                 <tr>
                                     <td>
@@ -45,7 +49,7 @@
                         break;
 
                     case ModalState.Create:
-                        <EditForm EditContext="editContext" Model="@addWalletModel" OnValidSubmit="@HandleValidSubmit">
+                        <EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
                             <DataAnnotationsValidator />
                             <ValidationSummary />
 
@@ -67,7 +71,7 @@
                         break;
 
                     case ModalState.Restore:
-                        <EditForm EditContext="editContext" Model="@addWalletModel" OnValidSubmit="@HandleValidSubmit">
+                        <EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
                             <DataAnnotationsValidator />
                             <ValidationSummary />
 
@@ -120,12 +124,12 @@
 
     private void CreateWallet() 
     {
-        addWalletModel.Mnemonic = new MnemonicService().Generate(24).Words;
         modalState = ModalState.Create;
     }
 
     private void RestoreWallet()
     {
+        addWalletModel.Mnemonic = new MnemonicService().Generate(24).Words;
         modalState = ModalState.Restore;
     }
 
@@ -138,31 +142,22 @@
     protected override async Task OnInitializedAsync()
     {
         editContext = new(addWalletModel);
-        editContext.OnValidationRequested += HandleValidationRequested;
-    }
-
-    private void HandleValidationRequested(object? sender,
-        ValidationRequestedEventArgs args)
-    {
-        messageStore?.Clear();
-
-        // Custom validation logic
-        var wallet = walletDatabase.GetByNameAsync(addWalletModel.Name).Result;
-        if(wallet != null)
-        {
-            messageStore?.Add(() => addWalletModel.Name, "Name already exists");
-        }
     }
 
     private async Task HandleValidSubmit()
     {
         // Process the valid form
-        var wallet = await walletDatabase.GetByNameAsync(addWalletModel.Name);
+        Wallet wallet;
 
-        if(wallet != null) 
-
-        await addressService.AddWallet(addWalletModel.Name, addWalletModel.Mnemonic, addWalletModel.Password);
-        wallet = await walletDatabase.GetByNameAsync(addWalletModel.Name);
+        try
+        {  
+            wallet = await addressService.AddWallet(addWalletModel.Name, addWalletModel.Mnemonic, addWalletModel.Password);
+        }
+        catch (Exception e)
+        {
+                
+            throw;
+        }
 
         await OnClose.InvokeAsync(wallet);
     }
