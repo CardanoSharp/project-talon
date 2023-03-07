@@ -1,7 +1,26 @@
-﻿@page "/sendfunds"
+﻿@page "/send"
 
-<h3>SendFunds</h3>
+<h3>Send</h3>
+
+<EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+</EditForm>
 
 @code {
+    
+    private EditContext? editContext;
+    private object addWalletModel = new();
+    private ValidationMessageStore? messageStore;
 
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new(addWalletModel);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+    }
 }

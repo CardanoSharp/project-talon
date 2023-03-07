@@ -1,4 +1,4 @@
-﻿using CardanoSharp.Koios.Sdk.Contracts;
+﻿using CardanoSharp.Koios.Client.Contracts;
 using SQLite;
 
 namespace ProjectTalon.Core.Data.Models

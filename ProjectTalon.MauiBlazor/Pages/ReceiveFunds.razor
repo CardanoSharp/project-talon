@@ -1,6 +1,6 @@
 ﻿@page "/receive"
-@using CardanoSharp.Koios.Sdk
-@using CardanoSharp.Koios.Sdk.Contracts
+@using CardanoSharp.Koios.Client
+@using CardanoSharp.Koios.Client.Contracts
 @using CardanoSharp.Wallet
 @using CardanoSharp.Wallet.Enums
 @using CardanoSharp.Wallet.Extensions
@@ -85,7 +85,7 @@
         while (cnt < 10)
         {
             string bechAddress = string.Empty;
-            StakeAddress[] addresses;
+            AccountAddressGroup[] addresses;
             switch (wallet.WalletType)
             {
                 case (int)WalletType.HD:
@@ -119,7 +119,7 @@
                     throw new Exception("Unknown wallet type.");
             }
 
-            var addressResponse = await addressClient.GetAddressInformation(bechAddress);
+            var addressResponse = await addressClient.GetAddressInformation(new AddressBulkRequest() { Addresses = new List<string> { bechAddress } });
             if (addressResponse.Error is not null)
                 throw new Exception(addressResponse.Error.Message);
 

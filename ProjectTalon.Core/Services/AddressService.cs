@@ -1,4 +1,4 @@
-﻿using CardanoSharp.Koios.Sdk;
+﻿using CardanoSharp.Koios.Client;
 using CardanoSharp.Wallet;
 using CardanoSharp.Wallet.Enums;
 using CardanoSharp.Wallet.Extensions.Models;
@@ -87,7 +87,7 @@ namespace ProjectTalon.Core.Services
         {
             try
             {
-                var addressResponse = (await _addressClient.GetAddressInformation(address));
+                var addressResponse = (await _addressClient.GetAddressInformation(new AddressBulkRequest() { Addresses = new List<string>() { address } }));
                 var addressInfo = addressResponse.Content;
                 var utxos = new List<Utxo>();
 

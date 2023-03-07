@@ -1,4 +1,4 @@
-﻿using CardanoSharp.Koios.Sdk;
+﻿using CardanoSharp.Koios.Client;
 using CardanoSharp.Wallet;
 using ProjectTalon.Core.Data;
 using ProjectTalon.MauiBlazor.Data;
@@ -23,7 +23,7 @@ namespace ProjectTalon.MauiBlazor
 		        builder.Services.AddBlazorWebViewDeveloperTools();
             #endif
 
-            builder.Services.AddKoios("https://testnet.koios.rest/api/v0");
+            builder.Services.AddKoios("https://preprod.koios.rest/api/v0");
 
             builder.Services.AddSingleton<WeatherForecastService>();
             builder.Services.AddSingleton<IMnemonicService>(new MnemonicService());

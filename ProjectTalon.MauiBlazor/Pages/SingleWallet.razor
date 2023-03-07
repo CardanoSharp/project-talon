@@ -1,6 +1,6 @@
 ﻿@implements IDisposable
-@using CardanoSharp.Koios.Sdk
-@using CardanoSharp.Koios.Sdk.Contracts
+@using CardanoSharp.Koios.Client
+@using CardanoSharp.Koios.Client.Contracts
 @using CardanoSharp.Wallet
 @using CardanoSharp.Wallet.Enums
 @using CardanoSharp.Wallet.Extensions
@@ -144,7 +144,7 @@ else
 
     public string stakeAddress { get; set; }
 
-    public StakeInformation stakeInformation { get; set; }
+    public AccountInformation stakeInformation { get; set; }
     private List<TransactionSummary> transactions = new List<TransactionSummary>();
     private List<AssetSummary> assets = new List<AssetSummary>();
 
@@ -185,34 +185,37 @@ else
 
     public async Task GetAssets()
     {
-        var accountItems = await accountClient.GetStakeAssets(stakeAddress);
+        var accountItems = await accountClient.GetAccountAssets(new AccountBulkRequest() { StakeAddresses = new string[]{ stakeAddress } });
         foreach (var ai in accountItems.Content)
         {
-            var assetNameHex = Encoding.ASCII.GetBytes(ai.AssetName).ToStringHex();
-
-            var assetInfo = (await assetClient.GetInfo(ai.AssetPolicy, assetNameHex));
-            var txMetadata = await transactionClient.GetTransactionMetadata(new GetTransactionRequest()
-                {
-                    TxHashes = new List<string>() { assetInfo.Content[0].MintingTxHash }
-                });
-
-            string image = string.Empty;
-            foreach (var tm in txMetadata.Content)
+            foreach (var asset in ai.Assets)
             {
-                if (!string.IsNullOrEmpty(image)) break;
+                var assetNameHex = Encoding.ASCII.GetBytes(asset.AssetName).ToStringHex();
 
-                if (tm.Metadata is null) continue;
-
-                foreach (var metadata in tm.Metadata)
-                {
-                    if (metadata.Key == 721)
+                var assetInfo = (await assetClient.GetInfo(asset.PolicyId, asset.AssetName));
+                var txMetadata = await transactionClient.GetTransactionMetadata(new GetTransactionRequest()
                     {
-                        image = GetImageUrl(metadata.Value.ToString());
+                        TxHashes = new List<string>() { assetInfo.Content[0].MintingTxHash }
+                    });
+
+                string image = string.Empty;
+                foreach (var tm in txMetadata.Content)
+                {
+                    if (!string.IsNullOrEmpty(image)) break;
+
+                    if (tm.Metadata is null) continue;
+
+                    foreach (var metadata in tm.Metadata)
+                    {
+                        if (metadata.Key == 721)
+                        {
+                            image = GetImageUrl(metadata.Value.ToString());
+                        }
                     }
                 }
+                assets.Add(new AssetSummary(image, asset.PolicyId, asset.AssetName, asset.Quantity));
             }
 
-            assets.Add(new AssetSummary(image, ai.AssetPolicy, ai.AssetName, ai.Quantity));
         }
     }
 
@@ -262,8 +265,7 @@ else
 
     public async Task GetBalance()
     {
-        string bechAddress = string.Empty;
-        StakeAddress[] addresses;
+        AccountAddressGroup[] addresses;
         switch (wallet.WalletType)
         {
             case (int)WalletType.HD:
@@ -283,9 +285,8 @@ else
                     .Derive(RoleType.Staking)
                     .Derive(0);
 
-                bechAddress = new AddressService().GetBaseAddress(payment.PublicKey, stake.PublicKey, NetworkType.Testnet).ToString();
-                stakeAddress = new AddressService().GetRewardAddress(stake.PublicKey, NetworkType.Testnet).ToString();
-                var addressesResponse = await accountClient.GetStakeAddresses(bechAddress);
+                stakeAddress = new AddressService().GetRewardAddress(stake.PublicKey, NetworkType.Preprod).ToString();
+                var addressesResponse = await accountClient.GetAccountAddresses(new AccountBulkRequest() { StakeAddresses = new string[] { stakeAddress } });
                 if (addressesResponse.Error is not null)
                     throw new Exception(addressesResponse.Error.Message);
 
@@ -298,11 +299,11 @@ else
                 var stakeKeyStr = wallet.Keys.FirstOrDefault(x => x.KeyType == (int)KeyType.Staking).Vkey;
                 var stakeKey = new PublicKey(stakeKeyStr.HexToByteArray(), null);
 
-                bechAddress = new AddressService().GetBaseAddress(paymentKey, stakeKey, NetworkType.Testnet).ToString();
+                var bechAddress = new AddressService().GetBaseAddress(paymentKey, stakeKey, NetworkType.Preprod).ToString();
 
-                addresses = new StakeAddress[1]{
-                    new StakeAddress() {
-                        Address = bechAddress
+                addresses = new AccountAddressGroup[1]{
+                    new AccountAddressGroup() {
+                        Addresses = new string[] { bechAddress }
                     }
     };
                 break;
@@ -312,18 +313,18 @@ else
 
         foreach (var address in addresses)
         {
-            var addrBalanceResponse = await addressClient.GetAddressInformation(address.Address);
+            var addrBalanceResponse = await addressClient.GetAddressInformation(new AddressBulkRequest() { Addresses = address.Addresses.ToList() });
             wallet.AddressInformation.AddRange(addrBalanceResponse.Content);
         }
 
         if (addresses.Any())
         {
-            var stakeInformationResponse = await accountClient.GetStakeInformation(addresses.First().Address);
+            var stakeInformationResponse = await accountClient.GetAccountInformation(new AccountBulkRequest() { StakeAddresses = new string[] { addresses.First().StakeAddress } });
             var responseModel = stakeInformationResponse.Content.FirstOrDefault();
 
             if (responseModel is not null)
             {
-                stakeInformation = new StakeInformation()
+                stakeInformation = new AccountInformation()
                     {
                         DelegatedPool = responseModel.DelegatedPool,
                         TotalBalance = (decimal.Parse(responseModel.TotalBalance) / 1000000.000m).ToString(),
